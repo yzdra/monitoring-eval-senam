@@ -1,0 +1,6343 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+
+<title>Monitoring Hasil Test Senam</title>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap');
+
+:root {
+  --blue-900: #073b66;
+  --blue-800: #075985;
+  --blue-700: #087ea4;
+  --blue-600: #0b91b8;
+  --blue-500: #20a9c8;
+
+  --green-700: #16856d;
+  --green-600: #1ca982;
+  --green-500: #43c6a1;
+  --green-400: #73d7b9;
+  --green-100: #e5f8f1;
+
+  --yellow-600: #c79a17;
+  --yellow-500: #f5c84b;
+  --yellow-100: #fff8d9;
+
+  --red-600: #d95555;
+  --red-500: #ef6b6b;
+  --red-100: #fff0f0;
+
+  --white: #ffffff;
+
+  --surface: #f7fbfc;
+  --surface-2: #eef8f7;
+
+  --text-900: #163447;
+  --text-800: #23475b;
+  --text-700: #426273;
+  --text-600: #637c8b;
+  --text-500: #8499a5;
+
+  --border: rgba(20, 93, 113, .11);
+  --border-strong: rgba(20, 93, 113, .18);
+
+  --shadow-sm:
+    0 3px 12px rgba(8, 78, 100, .07);
+
+  --shadow-md:
+    0 8px 24px rgba(8, 78, 100, .10);
+
+  --shadow-lg:
+    0 18px 50px rgba(8, 78, 100, .18);
+
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 19px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: "DM Sans", sans-serif;
+  color: var(--text-900);
+
+  background:
+    radial-gradient(
+      circle at 8% 10%,
+      rgba(115, 215, 185, .32),
+      transparent 30%
+    ),
+    radial-gradient(
+      circle at 95% 90%,
+      rgba(32, 169, 200, .22),
+      transparent 32%
+    ),
+    linear-gradient(
+      135deg,
+      #e7f7f4 0%,
+      #f7fbfc 48%,
+      #e4f4f8 100%
+    );
+
+  overflow: hidden;
+
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+strong,
+b {
+  font-family: "Plus Jakarta Sans", sans-serif;
+}
+
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+}
+
+button {
+  border: 0;
+  outline: none;
+}
+
+p {
+  letter-spacing: -.02px;
+}
+
+::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+
+::-webkit-scrollbar-track {
+  background: #edf7f7;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #9ed8cc;
+  border-radius: 99px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--green-600);
+}
+
+.topbar {
+  height: 76px;
+
+  position: relative;
+  z-index: 10;
+
+  color: #fff;
+
+  background:
+    linear-gradient(
+      120deg,
+      #075985 0%,
+      #087ea4 45%,
+      #16856d 100%
+    );
+
+  box-shadow:
+    0 8px 28px rgba(4, 73, 92, .20);
+}
+
+.topbar-inner {
+  width: 100%;
+  max-width: 1500px;
+  height: 100%;
+
+  margin: auto;
+  padding: 0 26px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 20px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+
+  min-width: 0;
+}
+
+.brand-icon {
+  width: 46px;
+  height: 46px;
+
+  flex: 0 0 46px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 14px;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(255,255,255,.20),
+      rgba(255,255,255,.08)
+    );
+
+  border: 1px solid rgba(255,255,255,.24);
+
+  box-shadow:
+    0 5px 15px rgba(0,0,0,.08),
+    inset 0 1px 0 rgba(255,255,255,.20);
+
+  font-size: 22px;
+}
+
+.brand h1 {
+  margin: 0;
+
+  font-size: 19px;
+  line-height: 1.2;
+  font-weight: 800;
+
+  letter-spacing: -.5px;
+
+  color: #fff;
+}
+
+.brand p {
+  margin: 5px 0 0;
+
+  font-size: 11px;
+  line-height: 1.3;
+  font-weight: 500;
+
+  color: rgba(255,255,255,.78);
+}
+
+.container {
+  width: 100%;
+  max-width: 1500px;
+  margin: auto;
+}
+
+.dashboard {
+  height: calc(100vh - 76px);
+
+  padding: 17px 26px 18px;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 13px;
+
+  overflow: hidden;
+}
+
+button,
+.btn {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.btn {
+  position: relative;
+
+  min-height: 40px;
+  height: 40px;
+
+  padding: 0 17px;
+
+  border-radius: 11px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 7px;
+
+  font-family: "Plus Jakarta Sans", sans-serif;
+  font-size: 11.5px;
+  font-weight: 700;
+
+  line-height: 1;
+  letter-spacing: -.1px;
+
+  cursor: pointer;
+
+  overflow: hidden;
+
+  transition:
+    transform .18s ease,
+    box-shadow .18s ease,
+    background .18s ease,
+    border-color .18s ease;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+}
+
+.btn:active {
+  transform: translateY(0);
+}
+
+.btn::before {
+  content: "";
+
+  position: absolute;
+  inset: 0;
+
+  background:
+    linear-gradient(
+      110deg,
+      transparent 25%,
+      rgba(255,255,255,.17) 50%,
+      transparent 75%
+    );
+
+  transform: translateX(-120%);
+
+  transition: transform .45s ease;
+}
+
+.btn:hover::before {
+  transform: translateX(120%);
+}
+
+.btn > * {
+  position: relative;
+  z-index: 1;
+}
+
+.btn-primary {
+  color: #fff;
+
+  background:
+    linear-gradient(
+      135deg,
+      #0b91b8,
+      #1ca982
+    );
+
+  border: 1px solid rgba(255,255,255,.10);
+
+  box-shadow:
+    0 6px 16px rgba(11,145,184,.20);
+}
+
+.btn-primary:hover {
+  box-shadow:
+    0 9px 22px rgba(11,145,184,.28);
+}
+
+.btn-soft {
+  color: var(--blue-800);
+
+  background: #eef8f8;
+
+  border: 1px solid rgba(8,126,164,.12);
+
+  box-shadow: none;
+}
+
+.btn-soft:hover {
+  background: #e2f3f2;
+}
+
+.btn-small {
+  width: 36px;
+  height: 36px;
+
+  min-height: 36px;
+
+  padding: 0;
+
+  border-radius: 10px;
+}
+
+button[class*="detail"],
+.btn-detail,
+.detail-btn,
+button[onclick*="detail"],
+button[onclick*="Detail"] {
+  min-width: 58px;
+  width: auto;
+
+  height: 38px;
+  min-height: 38px;
+
+  padding: 0 13px;
+
+  margin-top: 7px;
+
+  border-radius: 10px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  background:
+    linear-gradient(
+      135deg,
+      #0b91b8,
+      #16a58a
+    );
+
+  color: #fff;
+
+  font-family: "Plus Jakarta Sans", sans-serif;
+
+  font-size: 11px;
+  font-weight: 800;
+
+  line-height: 1;
+
+  letter-spacing: -.05px;
+
+  box-shadow:
+    0 5px 12px rgba(11,145,184,.18);
+
+  cursor: pointer;
+
+  transition:
+    transform .18s ease,
+    box-shadow .18s ease,
+    filter .18s ease;
+}
+
+button[class*="detail"]:hover,
+.btn-detail:hover,
+.detail-btn:hover,
+button[onclick*="detail"]:hover,
+button[onclick*="Detail"]:hover {
+  transform: translateY(-1px);
+
+  filter: brightness(1.03);
+
+  box-shadow:
+    0 8px 17px rgba(11,145,184,.25);
+}
+
+button[class*="detail"]:active,
+.btn-detail:active,
+.detail-btn:active {
+  transform: translateY(0);
+}
+
+.dashboard-stats {
+  flex: 0 0 104px;
+
+  display: grid;
+
+  grid-template-columns:
+    repeat(4, minmax(0, 1fr));
+
+  gap: 13px;
+}
+
+.stat {
+  position: relative;
+
+  min-width: 0;
+
+  padding: 15px 17px;
+
+  border-radius: var(--radius-md);
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(255,255,255,.97),
+      rgba(244,251,251,.97)
+    );
+
+  border: 1px solid rgba(255,255,255,.9);
+
+  box-shadow: var(--shadow-sm);
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  overflow: hidden;
+
+  transition:
+    transform .18s ease,
+    box-shadow .18s ease;
+}
+
+.stat::before {
+  content: "";
+
+  position: absolute;
+
+  left: 0;
+  top: 0;
+  bottom: 0;
+
+  width: 4px;
+
+  background:
+    linear-gradient(
+      180deg,
+      var(--blue-600),
+      var(--green-500)
+    );
+}
+
+.stat:nth-child(2)::before {
+  background: var(--green-500);
+}
+
+.stat:nth-child(3)::before {
+  background: var(--yellow-500);
+}
+
+.stat:nth-child(4)::before {
+  background: var(--blue-500);
+}
+
+.stat-clickable {
+  cursor: pointer;
+}
+
+.stat-clickable:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.stat .label {
+  margin-bottom: 5px;
+
+  font-size: 10.5px;
+  font-weight: 700;
+
+  color: var(--text-600);
+
+  text-transform: uppercase;
+  letter-spacing: .3px;
+}
+
+.stat .value {
+  font-family: "Plus Jakarta Sans", sans-serif;
+
+  font-size: 25px;
+  line-height: 1;
+
+  font-weight: 800;
+
+  color: var(--text-900);
+}
+
+.stat-sub {
+  margin-top: 5px;
+
+  font-size: 10px;
+  line-height: 1.3;
+
+  color: var(--text-500);
+
+  white-space: nowrap;
+}
+
+.stat-icon {
+  width: 42px;
+  height: 42px;
+
+  flex: 0 0 42px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 13px;
+
+  font-size: 18px;
+
+  background: #e8f6f5;
+  color: var(--green-700);
+}
+
+.stat:nth-child(2) .stat-icon {
+  background: var(--green-100);
+  color: var(--green-700);
+}
+
+.stat:nth-child(3) .stat-icon {
+  background: var(--yellow-100);
+  color: var(--yellow-600);
+}
+
+.stat:nth-child(4) .stat-icon {
+  background: #e7f4fa;
+  color: var(--blue-700);
+}
+
+.dashboard-main {
+  flex: 1 1 auto;
+  min-height: 0;
+
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 13px;
+  align-items: stretch;
+}
+
+.chart-panel {
+  grid-column: span 2;
+}
+
+.summary-panel {
+  grid-column: span 1;
+}
+
+.chart-panel,
+.summary-panel {
+  min-height: 0;
+
+  border-radius: var(--radius-lg);
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(255,255,255,.97),
+      rgba(246,251,251,.97)
+    );
+
+  border: 1px solid rgba(255,255,255,.95);
+
+  box-shadow: var(--shadow-md);
+}
+
+.panel-head {
+  min-height: 60px;
+
+  padding: 15px 18px 10px;
+
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+
+  gap: 14px;
+
+  border-bottom: 1px solid var(--border);
+}
+
+.panel-head h3 {
+  margin: 0;
+
+  font-family: "Plus Jakarta Sans", sans-serif;
+
+  font-size: 15px;
+  line-height: 1.3;
+
+  font-weight: 800;
+
+  color: var(--text-900);
+}
+
+.panel-head p {
+  margin: 4px 0 0;
+
+  font-size: 10.5px;
+  line-height: 1.4;
+
+  color: var(--text-500);
+}
+
+.chart-panel {
+  display: flex;
+  flex-direction: column;
+  overflow: visible;
+}
+
+.chart-filters {
+  display: flex;
+  align-items: center;
+
+  gap: 7px;
+}
+
+.month-select,
+#statFilter,
+#participantPageFilter {
+  height: 35px;
+
+  padding: 0 30px 0 11px;
+
+  border-radius: 9px;
+
+  border: 1px solid var(--border-strong);
+
+  background: #f7fbfb;
+
+  color: var(--text-700);
+
+  font-size: 10.5px;
+  font-weight: 700;
+
+  outline: none;
+
+  cursor: pointer;
+}
+
+.month-select:focus,
+#statFilter:focus,
+#participantPageFilter:focus {
+  border-color: rgba(11,145,184,.40);
+
+  box-shadow:
+    0 0 0 3px rgba(11,145,184,.08);
+}
+
+.chart-section {
+  flex: 1;
+
+  min-height: 0;
+
+  display: flex;
+  flex-direction: column;
+
+  padding: 9px 18px 0;
+}
+
+.chart-section-head {
+  flex: 0 0 auto;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  margin-bottom: 2px;
+}
+
+.chart-section-head h4 {
+  margin: 0;
+
+  font-family: "Plus Jakarta Sans", sans-serif;
+
+  font-size: 12px;
+  font-weight: 800;
+
+  color: var(--text-800);
+}
+
+.chart-section-head span {
+  display: block;
+
+  margin-top: 2px;
+
+  font-size: 9.5px;
+
+  color: var(--text-500);
+}
+
+.spider-wrapper {
+  flex: 0 0 250px;
+  height: 250px;
+  min-height: 250px;
+  max-height: 250px;
+
+  width: 100%;
+  position: relative;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0 20px;
+  box-sizing: border-box;
+}
+
+.spider-wrapper canvas {
+  display: block;
+
+  width: 100% !important;
+  height: 240px !important;
+
+  max-width: 100%;
+  max-height: 240px;
+}
+
+.movement-chart-wrapper {
+  flex: 1;
+
+  min-height: 0;
+
+  width: 100%;
+
+  position: relative;
+
+  padding: 5px 15px 0;
+}
+
+.movement-chart-wrapper canvas {
+  display: block;
+
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.chart-info {
+  flex: 0 0 39px;
+
+  margin: 0 18px;
+
+  border-top: 1px solid var(--border);
+
+  display: flex;
+  align-items: center;
+
+  gap: 25px;
+
+  font-size: 10px;
+
+  color: var(--text-500);
+}
+
+.chart-info span {
+  display: inline-flex;
+  align-items: center;
+
+  gap: 5px;
+}
+
+.chart-info b {
+  color: var(--blue-700);
+
+  font-weight: 800;
+}
+
+.summary-panel {
+  display: flex;
+  flex-direction: column;
+
+  overflow: hidden;
+}
+
+.summary-panel .panel-head {
+  flex: 0 0 auto;
+}
+
+.summary-item {
+  min-height: 65px;
+
+  margin: 0 15px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 11px;
+
+  border-bottom: 1px solid var(--border);
+}
+
+.summary-icon {
+  width: 35px;
+  height: 35px;
+
+  flex: 0 0 35px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 10px;
+
+  background: #eaf7f6;
+
+  color: var(--green-700);
+
+  font-size: 15px;
+}
+
+.summary-item:nth-child(3) .summary-icon {
+  background: var(--green-100);
+  color: var(--green-700);
+}
+
+.summary-item:nth-child(4) .summary-icon {
+  background: var(--yellow-100);
+  color: var(--yellow-600);
+}
+
+.summary-item small {
+  display: block;
+
+  margin-bottom: 2px;
+
+  font-size: 9.5px;
+
+  color: var(--text-500);
+}
+
+.summary-item b {
+  display: block;
+
+  font-family: "Plus Jakarta Sans", sans-serif;
+
+  font-size: 17px;
+
+  font-weight: 800;
+
+  color: var(--text-900);
+}
+
+.summary-progress {
+  margin: auto 15px 15px;
+
+  padding: 13px;
+
+  border-radius: 13px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #e9f8f5,
+      #edf8fb
+    );
+
+  border: 1px solid rgba(32,169,200,.08);
+}
+
+.summary-progress-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  margin-bottom: 8px;
+
+  font-size: 10px;
+
+  color: var(--text-600);
+}
+
+.summary-progress-head b {
+  font-size: 14px;
+
+  color: var(--green-700);
+}
+
+.progress-track {
+  width: 100%;
+  height: 7px;
+
+  overflow: hidden;
+
+  border-radius: 99px;
+
+  background: rgba(255,255,255,.8);
+}
+
+.progress-fill {
+  height: 100%;
+
+  border-radius: inherit;
+
+  background:
+    linear-gradient(
+      90deg,
+      var(--blue-600),
+      var(--green-500)
+    );
+
+  transition: width .4s ease;
+}
+
+.quick-menu {
+  flex: 0 0 83px;
+
+  display: grid;
+
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr));
+
+  gap: 13px;
+}
+
+.quick-card {
+  position: relative;
+
+  min-width: 0;
+
+  height: 83px;
+
+  padding: 13px 15px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 12px;
+
+  text-align: left;
+
+  border-radius: var(--radius-md);
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(255,255,255,.98),
+      rgba(238,249,247,.98)
+    );
+
+  border: 1px solid rgba(255,255,255,.9);
+
+  box-shadow: var(--shadow-sm);
+
+  cursor: pointer;
+
+  overflow: hidden;
+
+  transition:
+    transform .18s ease,
+    box-shadow .18s ease;
+}
+
+.quick-card::before {
+  content: "";
+
+  position: absolute;
+
+  left: 0;
+  top: 0;
+  bottom: 0;
+
+  width: 4px;
+
+  background:
+    linear-gradient(
+      180deg,
+      var(--blue-600),
+      var(--green-500)
+    );
+}
+
+.quick-card:hover {
+  transform: translateY(-2px);
+
+  box-shadow: var(--shadow-md);
+}
+
+.quick-icon {
+  width: 39px;
+  height: 39px;
+
+  flex: 0 0 39px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 11px;
+
+  background: #e4f5f5;
+
+  color: var(--blue-700);
+
+  font-size: 17px;
+}
+
+.quick-card:nth-child(2) .quick-icon {
+  background: var(--yellow-100);
+  color: var(--yellow-600);
+}
+
+.quick-card:nth-child(3) .quick-icon {
+  background: var(--green-100);
+  color: var(--green-700);
+}
+
+.quick-content {
+  min-width: 0;
+  flex: 1;
+}
+
+.quick-content h3 {
+  margin: 0 0 3px;
+
+  font-family: "Plus Jakarta Sans", sans-serif;
+
+  font-size: 11.5px;
+  font-weight: 800;
+
+  color: var(--text-900);
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.quick-content p {
+  margin: 0;
+
+  font-size: 9px;
+  line-height: 1.35;
+
+  color: var(--text-500);
+
+  display: -webkit-box;
+
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+
+  overflow: hidden;
+}
+
+.quick-arrow {
+  width: 27px;
+  height: 27px;
+
+  flex: 0 0 27px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 8px;
+
+  background: #edf7f7;
+
+  color: var(--blue-700);
+
+  font-size: 14px;
+
+  transition:
+    transform .18s ease,
+    background .18s ease;
+}
+
+.quick-card:hover .quick-arrow {
+  transform: translateX(3px);
+
+  background: var(--green-100);
+
+  color: var(--green-700);
+}
+
+.modal {
+  position: fixed;
+
+  inset: 0;
+
+  z-index: 1000;
+
+  display: none;
+
+  align-items: center;
+  justify-content: center;
+
+  padding: 20px;
+
+  background:
+    rgba(7, 59, 102, .45);
+
+  backdrop-filter: blur(7px);
+}
+
+.modal.active,
+.modal.show {
+  display: flex;
+}
+
+.modal-box {
+  width: min(620px, 100%);
+
+  max-height: calc(100vh - 40px);
+
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  border-radius: 20px;
+
+  background:
+    linear-gradient(
+      145deg,
+      #ffffff,
+      #f4fbfa
+    );
+
+  border: 1px solid rgba(255,255,255,.95);
+
+  box-shadow:
+    0 25px 70px rgba(5,55,76,.25);
+
+  animation: modalIn .2s ease;
+}
+
+.modal-wide {
+  width: min(1080px, 100%);
+
+  max-height: calc(100vh - 32px);
+}
+
+@keyframes modalIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.modal-head {
+  min-height: 72px;
+
+  padding: 16px 20px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 15px;
+
+  border-bottom: 1px solid var(--border);
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(234,248,247,.9),
+      rgba(240,248,251,.9)
+    );
+}
+
+.modal-head h3 {
+  margin: 0;
+
+  font-family: "Plus Jakarta Sans", sans-serif;
+
+  font-size: 17px;
+  line-height: 1.25;
+
+  font-weight: 800;
+
+  color: var(--text-900);
+}
+
+.modal-head p {
+  margin: 5px 0 0;
+
+  font-size: 11px;
+  line-height: 1.4;
+
+  color: var(--text-500);
+}
+
+.modal-head button,
+.modal-close,
+button[onclick*="close"],
+button[onclick*="Close"] {
+  width: 40px;
+  height: 40px;
+
+  min-width: 40px;
+
+  padding: 0;
+
+  flex: 0 0 40px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 11px;
+
+  background: rgba(255,255,255,.72);
+
+  border: 1px solid rgba(20,93,113,.09);
+
+  color: var(--blue-800);
+
+  font-size: 21px;
+  font-weight: 500;
+
+  cursor: pointer;
+
+  box-shadow:
+    0 3px 10px rgba(8,78,100,.06);
+
+  transition:
+    transform .18s ease,
+    background .18s ease,
+    color .18s ease;
+}
+
+.modal-head button:hover,
+.modal-close:hover,
+button[onclick*="close"]:hover,
+button[onclick*="Close"]:hover {
+  transform: rotate(3deg);
+
+  background: #fff;
+
+  color: var(--red-600);
+}
+
+.participant-list,
+.attention-list,
+#participantList,
+#attentionList {
+  padding: 13px 18px 18px;
+}
+
+.participant-item,
+.attention-item,
+.participant-card,
+.attention-card {
+  position: relative;
+
+  padding: 14px 15px 13px;
+
+  margin-bottom: 9px;
+
+  border-radius: 13px;
+
+  background: rgba(255,255,255,.82);
+
+  border: 1px solid var(--border);
+
+  box-shadow:
+    0 2px 8px rgba(8,78,100,.045);
+
+  transition:
+    border-color .18s ease,
+    box-shadow .18s ease,
+    transform .18s ease;
+}
+
+.participant-item:hover,
+.attention-item:hover,
+.participant-card:hover,
+.attention-card:hover {
+  transform: translateY(-1px);
+
+  border-color: rgba(11,145,184,.18);
+
+  box-shadow: var(--shadow-sm);
+}
+
+.attention-badge,
+.status-attention,
+.perlu-perhatian,
+.badge-warning {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-height: 24px;
+
+  padding: 4px 9px;
+
+  border-radius: 99px;
+
+  background: var(--yellow-100);
+
+  border: 1px solid rgba(245,200,75,.24);
+
+  color: #96720c;
+
+  font-family: "Plus Jakarta Sans", sans-serif;
+
+  font-size: 9.5px;
+  font-weight: 800;
+
+  line-height: 1;
+}
+
+.participant-name,
+.attention-name,
+.participant-item h4,
+.attention-item h4 {
+  margin: 0;
+
+  color: var(--text-900);
+
+  font-family: "Plus Jakarta Sans", sans-serif;
+
+  font-size: 16px;
+  line-height: 1.25;
+
+  font-weight: 800;
+
+  letter-spacing: -.25px;
+}
+
+.participant-meta,
+.attention-meta {
+  margin-top: 5px;
+
+  color: var(--text-600);
+
+  font-size: 11.5px;
+  line-height: 1.45;
+
+  font-weight: 500;
+}
+
+.participant-progress,
+.attention-progress {
+  width: 100%;
+
+  height: 8px;
+
+  margin-top: 9px;
+
+  overflow: hidden;
+
+  border-radius: 99px;
+
+  background: #edf3f4;
+
+  box-shadow:
+    inset 0 1px 2px rgba(8,78,100,.04);
+}
+
+.participant-progress > *,
+.attention-progress > * {
+  height: 100%;
+
+  border-radius: inherit;
+
+  background:
+    linear-gradient(
+      90deg,
+      var(--blue-600),
+      var(--green-500)
+    );
+}
+
+.modal-wide > * {
+  min-width: 0;
+}
+
+.detail-content,
+.detail-body,
+.modal-detail-body,
+#participantDetail {
+  padding: 18px 20px 22px;
+}
+
+.detail-header,
+.participant-detail-header {
+  padding: 0 0 14px;
+
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+
+  gap: 16px;
+
+  border-bottom: 1px solid var(--border);
+}
+
+.detail-header h3,
+.participant-detail-header h3 {
+  margin: 0;
+
+  font-family: "Plus Jakarta Sans", sans-serif;
+
+  font-size: 20px;
+  line-height: 1.25;
+
+  font-weight: 800;
+
+  color: var(--text-900);
+}
+
+.detail-header p,
+.participant-detail-header p {
+  margin: 5px 0 0;
+
+  font-size: 11px;
+  line-height: 1.45;
+
+  color: var(--text-500);
+}
+
+.detail-info,
+.participant-info {
+  margin-top: 15px;
+
+  display: grid;
+
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr));
+
+  gap: 9px;
+}
+
+.detail-info-item,
+.participant-info-item {
+  min-width: 0;
+
+  padding: 11px 12px;
+
+  border-radius: 11px;
+
+  background: #f7fbfb;
+
+  border: 1px solid var(--border);
+}
+
+.detail-info-item small,
+.participant-info-item small {
+  display: block;
+
+  margin-bottom: 4px;
+
+  font-size: 9px;
+
+  color: var(--text-500);
+}
+
+.detail-info-item strong,
+.participant-info-item strong {
+  display: block;
+
+  font-family: "Plus Jakarta Sans", sans-serif;
+
+  font-size: 12px;
+
+  color: var(--text-800);
+}
+
+.detail-status,
+.detail-results,
+.result-summary {
+  margin-top: 15px;
+
+  padding: 14px;
+
+  border-radius: 13px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #f2fbf8,
+      #f1f9fb
+    );
+
+  border: 1px solid rgba(28,169,130,.10);
+}
+
+.detail-status-title,
+.result-summary-title {
+  margin: 0 0 8px;
+
+  font-family: "Plus Jakarta Sans", sans-serif;
+
+  font-size: 12px;
+
+  font-weight: 800;
+
+  color: var(--text-900);
+}
+
+.detail-progress {
+  margin-top: 14px;
+}
+
+.detail-progress-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  margin-bottom: 7px;
+}
+
+.detail-progress-header span {
+  font-size: 10.5px;
+
+  color: var(--text-600);
+}
+
+.detail-progress-header strong {
+  font-family: "Plus Jakarta Sans", sans-serif;
+
+  font-size: 13px;
+
+  color: var(--green-700);
+}
+
+.detail-progress .progress-track {
+  height: 9px;
+}
+
+.priority-training,
+.training-priority,
+.recommendation-box {
+  margin-top: 15px;
+
+  padding: 15px;
+
+  border-radius: 13px;
+
+  background: #fff;
+
+  border: 1px solid var(--border);
+
+  box-shadow:
+    0 2px 9px rgba(8,78,100,.035);
+}
+
+.priority-training h4,
+.training-priority h4,
+.recommendation-box h4 {
+  margin: 0 0 7px;
+
+  font-family: "Plus Jakarta Sans", sans-serif;
+
+  font-size: 13px;
+
+  font-weight: 800;
+
+  color: var(--text-900);
+}
+
+.priority-training p,
+.training-priority p,
+.recommendation-box p {
+  margin: 4px 0;
+
+  font-size: 11px;
+
+  line-height: 1.55;
+
+  color: var(--text-700);
+}
+
+.detail-cover {
+  width: 100%;
+  min-height: 92px;
+  margin-bottom: 14px;
+  padding: 16px 18px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  border-radius: 16px;
+  background:
+    linear-gradient(135deg, #e6f7f4 0%, #eef8fb 52%, #e4f5f2 100%);
+  border: 1px solid rgba(20,93,113,.10);
+  box-shadow: 0 4px 14px rgba(8,78,100,.06);
+  overflow: visible;
+}
+
+.detail-cover-icon {
+  width: 58px;
+  height: 58px;
+  flex: 0 0 58px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 15px;
+  background: rgba(255,255,255,.82);
+  border: 1px solid rgba(255,255,255,.95);
+  font-size: 28px;
+  box-shadow: 0 4px 12px rgba(8,78,100,.07);
+}
+
+.detail-cover-text {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.detail-cover-text strong {
+  display: block;
+  max-width: 100%;
+  font-size: 17px;
+  line-height: 1.25;
+  color: var(--text-900);
+  overflow-wrap: anywhere;
+}
+
+.detail-cover-text span {
+  display: block;
+  font-size: 10.5px;
+  line-height: 1.4;
+  color: var(--text-600);
+  white-space: normal;
+}
+
+.detail-actions {
+  width: 100%;
+  margin-bottom: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.detail-actions .btn-small,
+.detail-actions .detail-action-btn {
+  width: auto;
+  min-width: 0;
+  min-height: 38px;
+  height: 38px;
+  padding: 0 14px;
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+.btn-danger {
+  color: #fff;
+  background: linear-gradient(135deg, #d95555, #ef6b6b);
+  border: 1px solid rgba(255,255,255,.12);
+  box-shadow: 0 5px 12px rgba(217,85,85,.18);
+}
+
+.btn-danger:hover {
+  box-shadow: 0 8px 17px rgba(217,85,85,.25);
+  filter: brightness(1.03);
+}
+
+.detail-top {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(220px, .36fr);
+  gap: 14px;
+  align-items: stretch;
+}
+
+.score-grid {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.score {
+  min-width: 0;
+  min-height: 72px;
+  padding: 11px 10px;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  background: #f7fbfb;
+  border: 1px solid var(--border);
+}
+
+.score small {
+  font-size: 9px;
+  line-height: 1.25;
+  color: var(--text-500);
+}
+
+.score b {
+  font-size: 10.5px;
+  line-height: 1.25;
+  color: var(--text-800);
+}
+
+.score.good {
+  background: var(--green-100);
+  border-color: rgba(28,169,130,.16);
+}
+
+.score.good b {
+  color: var(--green-700);
+}
+
+.score.bad {
+  background: var(--red-100);
+  border-color: rgba(217,85,85,.15);
+}
+
+.score.bad b {
+  color: var(--red-600);
+}
+
+.score.neutral {
+  background: #f6f8f9;
+}
+
+.detail-progress-box {
+  min-width: 0;
+  padding: 14px;
+  border-radius: 13px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background: linear-gradient(135deg, #e9f8f5, #edf8fb);
+  border: 1px solid rgba(32,169,200,.08);
+}
+
+.detail-progress-box > div:first-child {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.detail-progress-box span {
+  font-size: 10px;
+  color: var(--text-600);
+}
+
+.detail-progress-box b {
+  font-size: 14px;
+  color: var(--green-700);
+}
+
+.detail-note {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #f7fbfb;
+  border: 1px solid var(--border);
+  font-size: 10.5px;
+  line-height: 1.45;
+  color: var(--text-600);
+}
+
+.detail-note b {
+  color: var(--text-900);
+}
+
+.detail-rec {
+  margin-top: 14px;
+  padding: 15px;
+  border-radius: 13px;
+  background: #fff;
+  border: 1px solid var(--border);
+  box-shadow: 0 2px 9px rgba(8,78,100,.035);
+}
+
+.detail-rec h4 {
+  margin: 0 0 7px;
+  font-size: 13px;
+  color: var(--text-900);
+}
+
+.rec-message {
+  font-size: 10.5px;
+  line-height: 1.5;
+  color: var(--text-700);
+}
+
+.detail-rec-item {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+}
+
+.detail-rec-item b {
+  font-size: 10.5px;
+  color: var(--text-800);
+}
+
+.exercise-list {
+  margin-top: 8px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
+}
+
+.exercise-card {
+  min-width: 0;
+  padding: 9px 10px;
+  border-radius: 10px;
+  background: #f7fbfb;
+  border: 1px solid var(--border);
+}
+
+.exercise-name {
+  font-size: 10px;
+  font-weight: 800;
+  color: var(--text-800);
+}
+
+.exercise-dose,
+.exercise-info,
+.exercise-target {
+  margin-top: 4px;
+  font-size: 9px;
+  line-height: 1.4;
+  color: var(--text-600);
+}
+
+button[onclick*="openDetail"] {
+  width: auto;
+  min-width: 68px;
+  height: 36px;
+  min-height: 36px;
+  padding: 0 12px;
+  white-space: nowrap;
+}
+
+.participant-summary-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex: 0 0 auto;
+}
+
+.detail-charts,
+.detail-chart-grid,
+.chart-grid,
+#detailCharts {
+  width: 100%;
+
+  margin-top: 18px;
+
+  display: grid;
+
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+
+  gap: 14px;
+}
+
+.detail-chart,
+.chart-card,
+.detail-chart-card,
+.chart-container {
+  position: relative;
+
+  min-width: 0;
+
+  height: 245px;
+
+  padding: 14px 14px 10px;
+
+  border-radius: 14px;
+
+  background: #ffffff;
+
+  border: 1px solid var(--border);
+
+  box-shadow:
+    0 3px 10px rgba(8,78,100,.045);
+
+  overflow: hidden;
+}
+
+.detail-chart h4,
+.chart-card h4,
+.detail-chart-card h4 {
+  margin: 0 0 7px;
+
+  font-family: "Plus Jakarta Sans", sans-serif;
+
+  font-size: 11.5px;
+
+  font-weight: 800;
+
+  line-height: 1.3;
+
+  color: var(--text-800);
+}
+
+.detail-chart canvas,
+.chart-card canvas,
+.detail-chart-card canvas,
+.chart-container canvas {
+  display: block;
+
+  width: 100% !important;
+  height: 195px !important;
+
+  max-width: 100%;
+
+  margin: 0 auto;
+}
+
+.chart-wrapper,
+.graph-wrapper,
+.graph-container {
+  position: relative;
+
+  width: 100%;
+
+  height: 210px;
+
+  min-height: 0;
+}
+
+.chart-wrapper canvas,
+.graph-wrapper canvas,
+.graph-container canvas {
+  width: 100% !important;
+  height: 100% !important;
+
+  max-width: 100%;
+}
+
+.detail-charts > .detail-chart:nth-child(n+5),
+.detail-chart-grid > .detail-chart:nth-child(n+5),
+.chart-grid > .chart-card:nth-child(n+5) {
+  grid-column: span 1;
+}
+
+.detail-chart .chartjs-legend,
+.chart-card .chartjs-legend {
+  font-size: 9px !important;
+}
+
+.detail-content p,
+.detail-body p,
+.modal-detail-body p {
+  font-size: 11px;
+
+  line-height: 1.55;
+
+  color: var(--text-700);
+}
+
+.detail-content strong,
+.detail-body strong,
+.modal-detail-body strong {
+  color: var(--text-900);
+
+  font-weight: 800;
+}
+
+.movement-result,
+.exercise-result,
+.test-result {
+  padding: 9px 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 12px;
+
+  border-bottom: 1px solid var(--border);
+}
+
+.movement-result:last-child,
+.exercise-result:last-child,
+.test-result:last-child {
+  border-bottom: 0;
+}
+
+.movement-result span,
+.exercise-result span,
+.test-result span {
+  font-size: 10.5px;
+
+  color: var(--text-700);
+}
+
+.movement-result strong,
+.exercise-result strong,
+.test-result strong {
+  font-size: 11px;
+
+  color: var(--text-900);
+}
+
+.badge,
+.status,
+[class*="badge-"] {
+  display: inline-flex;
+
+  align-items: center;
+  justify-content: center;
+
+  min-height: 24px;
+
+  padding: 4px 9px;
+
+  border-radius: 99px;
+
+  font-size: 9px;
+
+  font-weight: 800;
+
+  line-height: 1;
+
+  white-space: nowrap;
+}
+
+form {
+  margin: 0;
+}
+
+.form-grid {
+  padding: 17px;
+
+  display: grid;
+
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+
+  gap: 13px;
+}
+
+.field {
+  min-width: 0;
+}
+
+.field.full {
+  grid-column: 1 / -1;
+}
+
+.field label {
+  display: block;
+
+  margin-bottom: 6px;
+
+  font-size: 10px;
+
+  font-weight: 700;
+
+  color: var(--text-700);
+}
+
+.field input,
+.field select,
+.search,
+#statFilter,
+#participantPageFilter {
+  width: 100%;
+
+  min-height: 38px;
+
+  padding: 8px 11px;
+
+  border-radius: 10px;
+
+  border: 1px solid var(--border-strong);
+
+  outline: none;
+
+  background: #fff;
+
+  color: var(--text-800);
+
+  font-size: 11px;
+
+  transition:
+    border .18s ease,
+    box-shadow .18s ease;
+}
+
+.field input:focus,
+.field select:focus,
+.search:focus {
+  border-color: rgba(11,145,184,.42);
+
+  box-shadow:
+    0 0 0 3px rgba(11,145,184,.08);
+}
+
+.field input::placeholder,
+.search::placeholder {
+  color: #a0afb7;
+}
+
+.form-actions {
+  padding: 12px 17px 17px;
+
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+
+  gap: 8px;
+
+  border-top: 1px solid var(--border);
+}
+
+.hint {
+  padding: 9px 11px;
+
+  border-radius: 9px;
+
+  background: #edf8f6;
+
+  border: 1px solid rgba(28,169,130,.08);
+
+  color: var(--text-600);
+
+  font-size: 9.5px;
+
+  line-height: 1.45;
+}
+
+.choice-grid {
+  padding: 17px;
+
+  display: grid;
+
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+
+  gap: 12px;
+}
+
+.choice-card {
+  padding: 18px;
+
+  text-align: left;
+
+  border-radius: 15px;
+
+  background: #fff;
+
+  border: 1px solid var(--border);
+
+  cursor: pointer;
+
+  transition:
+    transform .18s ease,
+    border .18s ease,
+    box-shadow .18s ease;
+}
+
+.choice-card:hover {
+  transform: translateY(-2px);
+
+  border-color: rgba(11,145,184,.25);
+
+  box-shadow: var(--shadow-md);
+}
+
+.choice-icon {
+  width: 42px;
+  height: 42px;
+
+  margin-bottom: 11px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 12px;
+
+  background: #e7f6f6;
+
+  color: var(--blue-700);
+
+  font-size: 19px;
+}
+
+.choice-card:nth-child(2) .choice-icon {
+  background: var(--yellow-100);
+  color: var(--yellow-600);
+}
+
+.choice-card h4 {
+  margin: 0 0 5px;
+
+  font-family: "Plus Jakarta Sans", sans-serif;
+
+  font-size: 12px;
+
+  color: var(--text-900);
+}
+
+.choice-card p {
+  margin: 0;
+
+  font-size: 10px;
+  line-height: 1.4;
+
+  color: var(--text-500);
+}
+
+.search {
+  flex: 1;
+}
+
+.table-wrap {
+  width: 100%;
+
+  overflow: auto;
+
+  border-radius: 12px;
+
+  border: 1px solid var(--border);
+}
+
+table {
+  width: 100%;
+
+  border-collapse: collapse;
+
+  font-size: 10.5px;
+
+  background: #fff;
+}
+
+thead {
+  background:
+    linear-gradient(
+      90deg,
+      #e9f7f5,
+      #edf7fa
+    );
+}
+
+th {
+  padding: 10px 11px;
+
+  text-align: left;
+
+  font-size: 9.5px;
+  font-weight: 800;
+
+  color: var(--blue-800);
+
+  white-space: nowrap;
+
+  border-bottom: 1px solid var(--border);
+}
+
+td {
+  padding: 9px 11px;
+
+  color: var(--text-700);
+
+  border-bottom: 1px solid #edf2f3;
+
+  white-space: nowrap;
+}
+
+tbody tr {
+  transition: background .15s ease;
+}
+
+tbody tr:hover {
+  background: #f5fbfa;
+}
+
+tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.standard-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+
+  gap: 13px;
+}
+
+.standard-card {
+  padding: 13px;
+
+  border-radius: 14px;
+
+  background: #fff;
+
+  border: 1px solid var(--border);
+
+  box-shadow: var(--shadow-sm);
+}
+
+.standard-card h4 {
+  margin: 0 0 10px;
+
+  font-family: "Plus Jakarta Sans", sans-serif;
+
+  font-size: 12px;
+  font-weight: 800;
+
+  color: var(--text-900);
+}
+
+.scroll {
+  max-height: 280px;
+
+  overflow: auto;
+
+  border-radius: 10px;
+
+  border: 1px solid var(--border);
+}
+
+input[type="file"] {
+  width: 100%;
+
+  padding: 10px;
+
+  border-radius: 10px;
+
+  border: 1px dashed #a9d7d1;
+
+  background: #f4fbfa;
+
+  color: var(--text-600);
+
+  font-size: 10px;
+}
+
+.toast {
+  position: fixed;
+
+  right: 22px;
+  bottom: 22px;
+
+  z-index: 3000;
+
+  min-width: 230px;
+
+  padding: 11px 14px;
+
+  border-radius: 11px;
+
+  background:
+    linear-gradient(
+      135deg,
+      var(--blue-800),
+      var(--green-700)
+    );
+
+  color: white;
+
+  font-size: 11px;
+  font-weight: 600;
+
+  box-shadow: var(--shadow-lg);
+
+  opacity: 0;
+
+  transform: translateY(10px);
+
+  pointer-events: none;
+
+  transition:
+    opacity .2s ease,
+    transform .2s ease;
+}
+
+.toast.show {
+  opacity: 1;
+
+  transform: translateY(0);
+}
+
+@media (max-width: 1200px) {
+
+  .dashboard {
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+
+  .topbar-inner {
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+
+  .stat {
+    padding: 13px 14px;
+  }
+
+  .stat .value {
+    font-size: 22px;
+  }
+
+  .stat-icon {
+    width: 37px;
+    height: 37px;
+    flex-basis: 37px;
+  }
+
+  .quick-card {
+    padding: 11px 12px;
+  }
+
+  .quick-icon {
+    width: 35px;
+    height: 35px;
+    flex-basis: 35px;
+  }
+
+  .modal-wide {
+    width: min(980px, 100%);
+  }
+}
+
+@media (max-width: 1200px) {
+  .chart-panel {
+    overflow: visible;
+  }
+
+  .spider-wrapper {
+    flex: 0 0 230px;
+    height: 230px;
+    min-height: 230px;
+    max-height: 230px;
+  }
+
+  .spider-wrapper canvas {
+    height: 220px !important;
+    max-height: 220px;
+  }
+}
+
+@media (max-width: 1000px) {
+
+  body {
+    overflow: auto;
+  }
+
+  .dashboard {
+    height: auto;
+
+    min-height: calc(100vh - 76px);
+
+    overflow: visible;
+  }
+
+  .dashboard-main {
+    grid-template-columns: 1fr;
+  }
+
+  .chart-panel {
+    min-height: 430px;
+  }
+
+  .summary-panel {
+    min-height: 300px;
+  }
+
+  .dashboard-stats {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+
+  .quick-menu {
+    grid-template-columns: 1fr;
+  }
+
+  .quick-card {
+    height: 76px;
+  }
+
+  .detail-charts,
+  .detail-chart-grid,
+  .chart-grid,
+  #detailCharts {
+    grid-template-columns: 1fr;
+  }
+
+  .detail-chart,
+  .chart-card,
+  .detail-chart-card,
+  .chart-container {
+    height: 260px;
+  }
+
+  .detail-chart canvas,
+  .chart-card canvas,
+  .detail-chart-card canvas,
+  .chart-container canvas {
+    height: 210px !important;
+  }
+}
+
+@media (max-width: 650px) {
+
+  body {
+    overflow: auto;
+  }
+
+  .topbar {
+    height: auto;
+    min-height: 72px;
+  }
+
+  .topbar-inner {
+    padding: 12px 14px;
+
+    align-items: center;
+  }
+
+  .brand h1 {
+    font-size: 15px;
+  }
+
+  .brand p {
+    font-size: 9.5px;
+  }
+
+  .brand-icon {
+    width: 38px;
+    height: 38px;
+
+    flex-basis: 38px;
+
+    font-size: 19px;
+  }
+
+  .topbar .btn {
+    height: 36px;
+    min-height: 36px;
+
+    padding: 0 11px;
+
+    font-size: 10px;
+  }
+
+  .dashboard {
+    padding: 12px;
+
+    gap: 10px;
+  }
+
+  .dashboard-stats {
+    grid-template-columns: 1fr 1fr;
+
+    gap: 9px;
+  }
+
+  .stat {
+    min-height: 94px;
+  }
+
+  .stat-sub {
+    white-space: normal;
+  }
+
+  .dashboard-main {
+    gap: 10px;
+  }
+
+  .chart-panel {
+    min-height: 400px;
+  }
+
+  .panel-head {
+    padding: 13px;
+  }
+
+  .chart-filters {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .month-select {
+    width: 120px;
+  }
+
+  .chart-section {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+
+  .spider-wrapper {
+    padding: 0;
+  }
+
+  .quick-menu {
+    gap: 9px;
+  }
+
+  .form-grid,
+  .choice-grid,
+  .standard-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .field.full {
+    grid-column: auto;
+  }
+
+  .modal {
+    padding: 10px;
+  }
+
+  .modal-box {
+    max-height: calc(100vh - 20px);
+  }
+
+  .modal-wide {
+    width: 100%;
+  }
+
+  .modal-head {
+    padding: 14px;
+
+    min-height: 64px;
+  }
+
+  .modal-head h3 {
+    font-size: 15px;
+  }
+
+  .detail-content,
+  .detail-body,
+  .modal-detail-body,
+  #participantDetail {
+    padding: 14px;
+  }
+
+  .detail-info,
+  .participant-info {
+    grid-template-columns: 1fr;
+  }
+
+  .detail-charts,
+  .detail-chart-grid,
+  .chart-grid,
+  #detailCharts {
+    grid-template-columns: 1fr;
+
+    gap: 10px;
+
+    margin-top: 13px;
+  }
+
+  .detail-chart,
+  .chart-card,
+  .detail-chart-card,
+  .chart-container {
+    height: 245px;
+  }
+
+  .detail-chart canvas,
+  .chart-card canvas,
+  .detail-chart-card canvas,
+  .chart-container canvas {
+    height: 195px !important;
+  }
+
+  button[class*="detail"],
+  .btn-detail,
+  .detail-btn,
+  button[onclick*="detail"],
+  button[onclick*="Detail"] {
+    height: 36px;
+    min-height: 36px;
+
+    min-width: 60px;
+
+    padding: 0 12px;
+
+    font-size: 10.5px;
+  }
+}
+
+@media (max-width: 1000px) {
+  .detail-top {
+    grid-template-columns: 1fr;
+  }
+
+  .score-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 650px) {
+  .detail-cover {
+    min-height: 84px;
+    padding: 13px;
+    gap: 11px;
+  }
+
+  .detail-cover-icon {
+    width: 50px;
+    height: 50px;
+    flex-basis: 50px;
+    font-size: 24px;
+  }
+
+  .detail-cover-text strong {
+    font-size: 15px;
+  }
+
+  .detail-actions {
+    justify-content: stretch;
+  }
+
+  .detail-actions .btn-small {
+    flex: 1 1 calc(50% - 8px);
+    min-width: 0;
+    padding: 0 10px;
+    font-size: 10px;
+  }
+
+  .score-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .exercise-list {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 430px) {
+
+  .brand p {
+    display: none;
+  }
+
+  .topbar .btn {
+    font-size: 0;
+  }
+
+  .topbar .btn::before {
+    content: "+";
+
+    font-size: 18px;
+  }
+
+  .dashboard-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .stat {
+    min-height: 82px;
+  }
+
+  .stat .value {
+    font-size: 21px;
+  }
+
+  .participant-name,
+  .attention-name,
+  .participant-item h4,
+  .attention-item h4 {
+    font-size: 15px;
+  }
+
+  .participant-meta,
+  .attention-meta {
+    font-size: 11px;
+  }
+
+  .detail-header h3,
+  .participant-detail-header h3 {
+    font-size: 17px;
+  }
+}
+
+#menuModal .modal-box {
+  width: min(680px, 94vw);
+  max-height: 88vh;
+  overflow: hidden;
+}
+
+#menuModalList {
+  padding: 15px !important;
+  max-height: calc(88vh - 100px);
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+#menuModalList .menu-group {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 15px;
+  margin-bottom: 12px;
+
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+
+  box-shadow: var(--shadow-sm);
+}
+
+#menuModalList .menu-group:last-child {
+  margin-bottom: 0;
+}
+
+.menu-group-head {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  margin-bottom: 13px;
+}
+
+.menu-group-icon {
+  width: 38px;
+  height: 38px;
+  flex: 0 0 38px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 11px;
+  background: var(--primary-soft);
+
+  font-size: 18px;
+}
+
+.menu-group-head h4 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--text);
+}
+
+.menu-group-head span {
+  display: block;
+  margin-top: 2px;
+  font-size: 10px;
+  color: var(--muted);
+}
+
+.menu-tags {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.menu-exercise {
+  min-width: 0;
+  box-sizing: border-box;
+
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  padding: 9px 10px;
+
+  border: 1px solid var(--border);
+  border-radius: 10px;
+
+  background: #f8fafc;
+}
+
+.menu-exercise-number {
+  width: 22px;
+  height: 22px;
+  min-width: 22px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 7px;
+
+  background: var(--primary);
+  color: #fff;
+
+  font-size: 9px;
+  font-weight: 800;
+}
+
+.menu-exercise-name {
+  min-width: 0;
+
+  font-size: 11px;
+  line-height: 1.4;
+  font-weight: 700;
+
+  color: var(--text);
+
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+#participantListModal table th:last-child {
+  width: 90px;
+  min-width: 90px;
+  text-align: center;
+}
+#participantListModal table td:last-child {
+  width: 90px;
+  min-width: 90px;
+  text-align: center;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+#participantPageRows button[onclick*="openDetail"],
+#statModalContent button[onclick*="openDetail"] {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  width: auto !important;
+  min-width: 72px !important;
+  height: 36px !important;
+  min-height: 36px !important;
+  padding: 0 13px !important;
+  margin: 0 !important;
+  flex: 0 0 auto !important;
+  white-space: nowrap !important;
+  overflow: visible !important;
+  border-radius: 10px;
+  font-size: 10.5px !important;
+  font-weight: 800;
+  line-height: 1 !important;
+}
+
+#statModalContent .participant-summary-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  margin-left: auto;
+  flex: 0 0 auto;
+  min-width: 72px;
+}
+
+#statModalContent .participant-summary {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+#statModalContent .participant-summary-main {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+@media (max-width: 700px) {
+  #menuModal .modal-box {
+    width: 94vw;
+    max-height: 90vh;
+  }
+  #menuModalList {
+    max-height: calc(90vh - 105px);
+    padding: 12px !important;
+  }
+  .menu-tags {
+    grid-template-columns: 1fr;
+  }
+  .menu-group {
+    padding: 13px !important;
+  }
+  #participantListModal .table-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  #participantListModal table {
+    min-width: 720px;
+  }
+  #participantPageRows button[onclick*="openDetail"],
+  #statModalContent button[onclick*="openDetail"] {
+    min-width: 68px !important;
+    height: 35px !important;
+    min-height: 35px !important;
+    padding: 0 11px !important;
+    font-size: 10px !important;
+  }
+}
+
+@media (max-width: 430px) {
+  #menuModalList {
+    padding: 10px !important;
+  }
+  .menu-group {
+    padding: 12px !important;
+    border-radius: 12px !important;
+  }
+  .menu-exercise {
+    padding: 9px;
+  }
+  .menu-exercise-name {
+    font-size: 10.5px;
+  }
+}
+
+#participantModal {
+  z-index: 1200 !important;
+}
+
+#participantModal.show {
+  z-index: 1200 !important;
+}
+
+#participantModal .modal-box {
+  position: relative;
+  z-index: 1201;
+}
+
+.form-actions .btn {
+  height: 38px;
+  min-height: 38px;
+  padding: 0 16px;
+  font-size: 10.5px;
+  line-height: 1;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+}
+
+.form-actions .btn-soft {
+  min-width: 68px;
+}
+
+.form-actions .btn-primary {
+  min-width: 105px;
+}
+
+
+/* =====================================================
+   POLISH TAMPILAN DETAIL PESERTA
+   Hanya mengatur visual; tidak mengubah fungsi/logic JS.
+===================================================== */
+.detail-cover-text strong { font-size: 21px; }
+.detail-cover-text span { font-size: 13px; }
+.detail-actions .btn-small,
+.detail-actions .detail-action-btn { min-height: 44px; height: 44px; padding: 0 17px; font-size: 14px; }
+.score { padding: 15px 13px; }
+.score span, .score small { font-size: 12px; }
+.score b { font-size: 17px; }
+.detail-progress-box span { font-size: 13px; }
+.detail-progress-box b { font-size: 19px; }
+.detail-note { font-size: 13px; line-height: 1.6; padding: 13px 15px; }
+.detail-rec { margin-top: 18px; padding: 20px; }
+.detail-rec h4 { font-size: 18px; margin-bottom: 10px; }
+.rec-message { font-size: 13px; line-height: 1.65; }
+.detail-rec-item b { font-size: 13px; }
+.exercise-list { gap: 10px; }
+.exercise-card { padding: 13px; }
+.exercise-name { font-size: 13px; }
+.exercise-dose, .exercise-info, .exercise-target { font-size: 12px; line-height: 1.5; }
+.chart-grid { margin-top: 12px; gap: 16px; }
+.chart-card { height: 285px; padding: 18px 18px 14px; }
+.chart-card h4 { font-size: 15px; margin-bottom: 12px; }
+.chart-card canvas { height: 225px !important; }
+.detail-modal h4[style] { font-size: 20px !important; margin: 8px 0 12px !important; }
+@media (max-width: 700px) {
+  .chart-card { height: 250px; padding: 14px; }
+  .chart-card canvas { height: 195px !important; }
+  .exercise-list { grid-template-columns: 1fr; }
+  .detail-rec { padding: 16px; }
+}
+
+</style>
+</head>
+
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">
+      <div class="brand-icon">
+        🤼
+      </div>
+      <div>
+        <h1>
+          Monitoring Hasil Test Senam
+        </h1>
+        <p>
+          Dashboard progres, evaluasi & perkembangan peserta
+        </p>
+      </div>
+    </div>
+
+    <button
+      class="btn btn-primary"
+      onclick="openParticipantChoice()">
+      ＋ Tambah Peserta
+    </button>
+  </div>
+</header>
+
+<main class="container dashboard">
+<section class="dashboard-stats">
+
+  <div
+    class="stat stat-clickable"
+    onclick="openStatModal('participants')">
+    <div>
+      <div class="label">
+        Total Peserta
+      </div>
+      <div
+        class="value"
+        id="statParticipants">
+        0
+      </div>
+      <div
+        class="stat-sub"
+        id="statProgress">
+        0% rata-rata progres
+      </div>
+    </div>
+    <div class="stat-icon">
+      👥
+    </div>
+  </div>
+
+  <div
+    class="stat stat-clickable"
+    onclick="openStatModal('good')">
+    <div>
+      <div class="label">
+        Memenuhi Semua Tes
+      </div>
+      <div
+        class="value"
+        id="statGood">
+        0
+      </div>
+      <div class="stat-sub">
+        Peserta memenuhi seluruh standar
+      </div>
+    </div>
+    <div class="stat-icon">
+      ✓
+    </div>
+  </div>
+
+  <div
+    class="stat stat-clickable"
+    onclick="openStatModal('attention')">
+    <div>
+      <div class="label">
+        Perlu Perhatian
+      </div>
+      <div
+        class="value"
+        id="statAttention">
+        0
+      </div>
+      <div class="stat-sub">
+        Masih terdapat hasil di bawah standar
+      </div>
+    </div>
+    <div class="stat-icon">
+      !
+    </div>
+  </div>
+
+  <div class="stat">
+    <div>
+      <div class="label">
+        Rata-rata Keberhasilan
+      </div>
+      <div
+        class="value"
+        id="statSuccess">
+        0%
+      </div>
+      <div class="stat-sub">
+        Berdasarkan hasil evaluasi terbaru
+      </div>
+    </div>
+    <div class="stat-icon">
+      ↗
+    </div>
+  </div>
+</section>
+
+<section class="dashboard-main">
+
+<div class="chart-panel">
+  <div class="panel-head">
+    <div>
+      <h3>
+        Perkembangan Gerakan
+      </h3>
+      <p>
+        Perbandingan rata-rata hasil peserta dan perkembangan setiap gerakan.
+      </p>
+    </div>
+    <div class="chart-filters">
+
+      <select
+        id="chartMovement"
+        class="month-select"
+        onchange="showMovementChart(this.value)">
+        <option value="all">
+          Semua Senam
+        </option>
+        <option value="sit_stand">
+          Duduk-Berdiri
+        </option>
+        <option value="one_leg">
+          1 Kaki
+        </option>
+        <option value="toe_touch">
+          Jangkauan
+        </option>
+        <option value="grip">
+          Genggaman
+        </option>
+      </select>
+
+      <select
+        id="chartMonth"
+        class="month-select"
+        onchange="renderDashboardCharts()">
+        <option value="latest">
+          Terbaru
+        </option>
+      </select>
+    </div>
+  </div>
+
+  <div class="chart-section">
+    <div class="chart-section-head">
+      <div>
+        <h4 id="chartTitle">
+          Rata-rata Hasil Gerakan
+        </h4>
+        <span id="chartDescription">
+          Profil rata-rata seluruh peserta pada periode yang dipilih.
+        </span>
+      </div>
+    </div>
+
+    <div
+      class="spider-wrapper"
+      id="spiderChartWrapper">
+      <canvas
+        id="monthlySpiderChart">
+      </canvas>
+    </div>
+
+    <div
+      class="movement-chart-wrapper"
+      id="movementChartWrapper"
+      style="display:none;">
+      <canvas
+        id="movementProgressChart">
+      </canvas>
+    </div>
+  </div>
+
+  <div class="chart-info">
+    <span>
+      <b id="chartParticipantCount">
+        0
+      </b>
+      peserta
+    </span>
+
+    <span>
+      <b id="chartEvaluationCount">
+        0
+      </b>
+      evaluasi
+    </span>
+  </div>
+</div>
+
+  <div class="summary-panel">
+    <div class="panel-head">
+      <div>
+        <h3>
+          Ringkasan
+        </h3>
+        <p>
+          Status monitoring saat ini
+        </p>
+      </div>
+    </div>
+
+    <div class="summary-item">
+      <div class="summary-icon">
+        👥
+      </div>
+      <div>
+        <small>
+          Total peserta
+        </small>
+        <b id="summaryParticipants">
+          0
+        </b>
+      </div>
+    </div>
+
+    <div class="summary-item">
+      <div class="summary-icon">
+        ✓
+      </div>
+      <div>
+        <small>
+          Memenuhi semua tes
+        </small>
+        <b id="summaryGood">
+          0
+        </b>
+      </div>
+    </div>
+
+    <div class="summary-item">
+      <div class="summary-icon">
+        !
+      </div>
+      <div>
+        <small>
+          Perlu perhatian
+        </small>
+        <b id="summaryAttention">
+          0
+        </b>
+      </div>
+    </div>
+
+    <div class="summary-progress">
+      <div class="summary-progress-head">
+        <span>
+          Keberhasilan
+        </span>
+        <b id="summarySuccess">
+          0%
+        </b>
+      </div>
+      <div class="progress-track">
+        <div
+          class="progress-fill"
+          id="summaryProgressFill"
+          style="width:0%">
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="quick-menu">
+  <button
+    class="quick-card"
+    onclick="openParticipantList()">
+    <div class="quick-icon">
+      👥
+    </div>
+    <div class="quick-content">
+      <h3>
+        Data Peserta
+      </h3>
+      <p>
+        Lihat peserta, progres, evaluasi dan rekomendasi.
+      </p>
+    </div>
+    <span class="quick-arrow">
+      →
+    </span>
+  </button>
+  <button
+    class="quick-card"
+    onclick="openStandardModal()">
+    <div class="quick-icon">
+      📊
+    </div>
+    <div class="quick-content">
+      <h3>
+        Standar yang Digunakan
+      </h3>
+      <p>
+        Lihat standar berdasarkan usia dan jenis kelamin.
+      </p>
+    </div>
+    <span class="quick-arrow">
+      →
+    </span>
+  </button>
+  <button
+    class="quick-card"
+    onclick="openMenuModal()">
+    <div class="quick-icon">
+      🤸
+    </div>
+    <div class="quick-content">
+      <h3>
+        Menu Senam
+      </h3>
+      <p>
+        Lihat daftar latihan yang digunakan sistem.
+      </p>
+    </div>
+    <span class="quick-arrow">
+      →
+    </span>
+  </button>
+</section>
+
+</main>
+<div class="modal" id="participantChoiceModal">
+  <div class="modal-box">
+    <div class="modal-head">
+      <div>
+        <h3>
+          Tambah Peserta
+        </h3>
+        <p>
+          Pilih cara menambahkan data peserta.
+        </p>
+      </div>
+
+      <button
+        class="btn btn-soft btn-small"
+        onclick="closeModal('participantChoiceModal')">
+        ✕
+      </button>
+
+    </div>
+
+    <div class="choice-grid">
+
+      <button
+        class="choice-card"
+        onclick="openManualParticipant()">
+
+        <div class="choice-icon">
+          👤
+        </div>
+
+        <h4>
+          Tambah Manual
+        </h4>
+
+        <p>
+          Masukkan data satu peserta secara langsung.
+        </p>
+
+      </button>
+
+      <button
+        class="choice-card"
+        onclick="openExcelImport()">
+
+        <div class="choice-icon">
+          📊
+        </div>
+
+        <h4>
+          Upload Excel
+        </h4>
+
+        <p>
+          Tambahkan banyak peserta menggunakan file Excel.
+        </p>
+
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+<div class="modal" id="statModal">
+  <div class="modal-box">
+    <div class="modal-head">
+
+      <div>
+        <h3 id="statModalTitle">
+          Data Peserta
+        </h3>
+
+        <p id="statModalDescription"></p>
+      </div>
+
+      <button
+        class="btn btn-soft btn-small"
+        onclick="closeModal('statModal')">
+        ✕
+      </button>
+
+    </div>
+
+    <div style="padding:15px">
+
+      <div
+        style="
+          display:flex;
+          gap:8px;
+          margin-bottom:12px;
+        ">
+
+        <input
+          class="search"
+          id="statSearch"
+          placeholder="Cari nama peserta..."
+          oninput="renderStatModal()">
+
+        <select
+          id="statFilter"
+          onchange="renderStatModal()">
+
+          <option value="all">
+            Semua
+          </option>
+
+          <option value="good">
+            Memenuhi
+          </option>
+
+          <option value="attention">
+            Perlu perhatian
+          </option>
+
+          <option value="incomplete">
+            Belum lengkap
+          </option>
+
+        </select>
+
+      </div>
+
+      <div id="statModalContent"></div>
+
+    </div>
+
+  </div>
+</div>
+
+<div class="modal" id="participantListModal">
+
+  <div class="modal-box modal-wide">
+
+    <div class="modal-head">
+
+      <div>
+
+        <h3>
+          Data Peserta
+        </h3>
+
+        <p>
+          Daftar peserta dan perkembangan evaluasi.
+        </p>
+
+      </div>
+
+      <button
+        class="btn btn-soft btn-small"
+        onclick="closeModal('participantListModal')">
+        ✕
+      </button>
+
+    </div>
+
+    <div style="padding:15px">
+
+      <div
+        style="
+          display:flex;
+          gap:8px;
+          margin-bottom:12px;
+        ">
+
+        <input
+          class="search"
+          id="participantPageSearch"
+          placeholder="Cari nama peserta..."
+          oninput="renderParticipantPage()">
+
+        <select
+          id="participantPageFilter"
+          onchange="renderParticipantPage()">
+
+          <option value="all">
+            Semua status
+          </option>
+
+          <option value="good">
+            Memenuhi
+          </option>
+
+          <option value="attention">
+            Perlu perhatian
+          </option>
+
+          <option value="incomplete">
+            Belum lengkap
+          </option>
+
+        </select>
+
+      </div>
+
+      <div class="table-wrap">
+
+        <table>
+
+          <thead>
+
+            <tr>
+
+              <th>
+                Peserta
+              </th>
+
+              <th>
+                Usia
+              </th>
+
+              <th>
+                Progress
+              </th>
+
+              <th>
+                Evaluasi Terbaru
+              </th>
+
+              <th>
+                Status
+              </th>
+
+              <th>
+                Aksi
+              </th>
+
+            </tr>
+
+          </thead>
+
+          <tbody id="participantPageRows"></tbody>
+
+        </table>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+<div class="modal" id="standardModal">
+
+  <div class="modal-box modal-wide">
+
+    <div class="modal-head">
+
+      <div>
+
+        <h3>
+          Standar yang Digunakan
+        </h3>
+
+        <p>
+          Standar hasil tes berdasarkan usia dan jenis kelamin.
+        </p>
+
+      </div>
+
+      <button
+        class="btn btn-soft btn-small"
+        onclick="closeModal('standardModal')">
+        ✕
+      </button>
+
+    </div>
+
+    <div style="padding:15px">
+
+      <div class="standard-grid">
+
+        <div class="standard-card">
+
+          <h4>
+            Pria
+          </h4>
+
+          <div class="scroll">
+
+            <table>
+
+              <thead>
+
+                <tr>
+
+                  <th>
+                    Usia
+                  </th>
+
+                  <th>
+                    Duduk-Berdiri
+                  </th>
+
+                  <th>
+                    1 Kaki
+                  </th>
+
+                  <th>
+                    Jangkauan
+                  </th>
+
+                  <th>
+                    Grip
+                  </th>
+
+                </tr>
+
+              </thead>
+
+              <tbody id="standardMale"></tbody>
+
+            </table>
+
+          </div>
+
+        </div>
+
+        <div class="standard-card">
+
+          <h4>
+            Wanita
+          </h4>
+
+          <div class="scroll">
+
+            <table>
+
+              <thead>
+
+                <tr>
+
+                  <th>
+                    Usia
+                  </th>
+
+                  <th>
+                    Duduk-Berdiri
+                  </th>
+
+                  <th>
+                    1 Kaki
+                  </th>
+
+                  <th>
+                    Jangkauan
+                  </th>
+
+                  <th>
+                    Grip
+                  </th>
+
+                </tr>
+
+              </thead>
+
+              <tbody id="standardFemale"></tbody>
+
+            </table>
+
+          </div>
+
+        </div>
+
+      </div>
+
+      <div
+        class="hint"
+        style="margin-top:12px">
+
+        Duduk-berdiri: waktu lebih rendah lebih baik.
+        Berdiri satu kaki: waktu lebih tinggi lebih baik.
+        Jangkauan dan genggaman: nilai lebih tinggi lebih baik.
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+<div class="modal" id="menuModal">
+
+  <div class="modal-box">
+
+    <div class="modal-head">
+
+      <div>
+
+        <h3>
+          Menu Senam
+        </h3>
+
+        <p>
+          Menu latihan yang digunakan dalam sistem.
+        </p>
+
+      </div>
+
+      <button
+        class="btn btn-soft btn-small"
+        onclick="closeModal('menuModal')">
+        ✕
+      </button>
+
+    </div>
+
+    <div
+      id="menuModalList"
+      style="padding:15px">
+    </div>
+
+  </div>
+
+</div>
+
+<div class="modal" id="participantModal">
+
+  <div class="modal-box">
+
+    <div class="modal-head">
+
+      <div>
+
+        <h3 id="participantModalTitle">
+          Tambah Peserta
+        </h3>
+
+        <p>
+          Masukkan identitas peserta.
+        </p>
+
+      </div>
+
+      <button
+        class="btn btn-soft btn-small"
+        onclick="closeModal('participantModal')">
+        ✕
+      </button>
+
+    </div>
+
+    <form id="participantForm">
+
+      <input
+        type="hidden"
+        id="participantId">
+
+      <div class="form-grid">
+
+        <div class="field">
+
+          <label>
+            Nama peserta
+          </label>
+
+          <input
+            id="name"
+            required>
+
+        </div>
+
+        <div class="field">
+
+          <label>
+            Umur
+          </label>
+
+          <input
+            id="age"
+            type="number"
+            min="1"
+            required>
+
+        </div>
+
+        <div class="field">
+
+          <label>
+            Jenis kelamin
+          </label>
+
+          <select
+            id="gender"
+            required>
+
+            <option value="">
+              Pilih
+            </option>
+
+            <option value="pria">
+              Pria
+            </option>
+
+            <option value="wanita">
+              Wanita
+            </option>
+
+          </select>
+
+        </div>
+
+        <div class="field">
+
+          <label>
+            Bulan evaluasi
+          </label>
+
+          <input
+            id="month"
+            placeholder="Contoh: September">
+
+        </div>
+
+        <div class="field">
+
+          <label>
+            Minggu
+          </label>
+
+          <input
+            id="week"
+            type="number"
+            min="1"
+            max="5"
+            value="1">
+
+        </div>
+
+        <div class="field full">
+
+          <div class="hint">
+            Hasil evaluasi pertama bersifat opsional.
+          </div>
+
+        </div>
+
+        <div class="field">
+
+          <label>
+            Duduk-Berdiri 10× (detik)
+          </label>
+
+          <input
+            id="sit_stand"
+            type="number"
+            step="0.1"
+            min="0">
+
+        </div>
+
+        <div class="field">
+
+          <label>
+            Berdiri 1 kaki (detik)
+          </label>
+
+          <input
+            id="one_leg"
+            type="number"
+            step="0.1"
+            min="0">
+
+        </div>
+
+        <div class="field">
+
+          <label>
+            Jangkauan / bungkuk (cm)
+          </label>
+
+          <input
+            id="toe_touch"
+            type="number"
+            step="0.1">
+
+        </div>
+
+        <div class="field">
+
+          <label>
+            Genggaman kanan (kg)
+          </label>
+
+          <input
+            id="grip_right"
+            type="number"
+            step="0.1"
+            min="0">
+
+        </div>
+
+        <div class="field">
+
+          <label>
+            Genggaman kiri (kg)
+          </label>
+
+          <input
+            id="grip_left"
+            type="number"
+            step="0.1"
+            min="0">
+
+        </div>
+
+      </div>
+
+      <div class="form-actions">
+
+        <button
+          type="button"
+          class="btn btn-soft"
+          onclick="closeModal('participantModal')">
+
+          Batal
+
+        </button>
+
+        <button class="btn btn-primary">
+
+          Simpan Peserta
+
+        </button>
+
+      </div>
+
+    </form>
+
+  </div>
+
+</div>
+
+<div class="modal" id="excelModal">
+
+  <div class="modal-box">
+
+    <div class="modal-head">
+
+      <div>
+
+        <h3>
+          Upload Data Excel
+        </h3>
+
+        <p>
+          Tambahkan beberapa peserta sekaligus.
+        </p>
+
+      </div>
+
+      <button
+        class="btn btn-soft btn-small"
+        onclick="closeModal('excelModal')">
+
+        ✕
+
+      </button>
+
+    </div>
+
+    <div style="padding:15px;text-align:center">
+
+      <h4>
+        Upload file Excel
+      </h4>
+
+      <p class="hint">
+        Gunakan format Excel yang sesuai dengan template sistem.
+      </p>
+
+      <input
+        type="file"
+        id="excelFile"
+        accept=".xlsx,.xls">
+
+      <br><br>
+
+      <button
+        class="btn btn-primary"
+        onclick="uploadExcel()">
+
+        Upload Excel
+
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+<div class="modal" id="detailModal">
+
+  <div class="modal-box modal-wide">
+
+    <div class="modal-head">
+
+      <div>
+
+        <h3 id="detailName">
+          Detail Peserta
+        </h3>
+
+        <p id="detailMeta"></p>
+
+      </div>
+
+      <button
+        class="btn btn-soft btn-small"
+        onclick="closeDetail()">
+
+        ✕
+
+      </button>
+
+    </div>
+
+    <div
+      id="detailContent"
+      style="padding:15px">
+    </div>
+
+  </div>
+
+</div>
+
+<div
+  class="toast"
+  id="toast">
+</div>
+
+<script>
+
+let participants = [];
+let standards = [];
+let charts = [];
+
+let movementChart = null;
+let currentMovement = 'all';
+let currentDetailId = null;
+
+const $ = id => document.getElementById(id);
+
+const esc = v =>
+  String(v ?? '').replace(/[&<>'"]/g, c => ({
+    '&':'&amp;',
+    '<':'&lt;',
+    '>':'&gt;',
+    "'":'&#039;',
+    '"':'&quot;'
+  }[c]));
+
+const fmt = v =>
+  v === null || v === undefined || v === ''
+    ? '-'
+    : (Number.isFinite(Number(v))
+      ? Number(v).toFixed(1).replace('.0','')
+      : esc(v));
+
+const genderLabel = g =>
+  g === 'pria' ? 'Pria' :
+  g === 'wanita' ? 'Wanita' : '-';
+
+function toast(msg){
+
+  $('toast').textContent = msg;
+
+  $('toast').classList.add('show');
+
+  setTimeout(() => {
+    $('toast').classList.remove('show');
+  },2200);
+
+}
+
+function closeModal(id){
+
+  const modal = $(id);
+
+  if(!modal) return;
+
+  modal.classList.remove('show');
+
+  if(id === 'detailModal'){
+    destroyCharts();
+  }
+
+}
+
+function closeDetail(showParticipantList = true){
+  currentDetailId = null;
+  destroyCharts();
+  const detailModal = $('detailModal');
+  if(detailModal){
+    detailModal.classList.remove('show');
+  }
+  if(showParticipantList){
+    const participantModal =
+      $('participantListModal');
+    if(participantModal){
+      participantModal.classList.remove('show');
+      renderParticipantPage();
+      participantModal.classList.add('show');
+    }
+  }
+}
+
+async function api(url,opts={}){
+
+  const r = await fetch(url,{
+    ...opts,
+    headers:{
+      'Content-Type':'application/json',
+      ...(opts.headers || {})
+    }
+  });
+
+  const d = await r.json().catch(() => ({}));
+
+  if(!r.ok){
+    throw new Error(d.error || 'Terjadi kesalahan');
+  }
+
+  return d;
+
+}
+
+function status(v){
+
+  if(v === 'bagus_sekali')
+    return ['Bagus sekali','badge-good','good'];
+
+  if(v === 'standar' || v === 'memenuhi')
+    return ['Memenuhi standar','badge-good','good'];
+
+  if(v === 'perlu_ditingkatkan')
+    return ['Perlu ditingkatkan','badge-bad','bad'];
+
+  return ['Belum dinilai','badge-neutral','neutral'];
+
+}
+
+function statusBadge(v){
+
+  const s = status(v);
+
+  return `
+    <span class="badge ${s[1]}">
+      ${s[0]}
+    </span>
+  `;
+
+}
+
+function participantProgress(p){
+
+  const c = p.classification || {};
+
+  const tests = [
+    c.sit_stand,
+    c.one_leg,
+    c.toe_touch,
+    c.grip_right,
+    c.grip_left
+  ];
+
+  const available = tests.filter(v => v !== null && v !== undefined);
+
+  if(!available.length){
+    return 0;
+  }
+
+  const passed = available.filter(v =>
+    v === 'bagus_sekali' ||
+    v === 'standar' ||
+    v === 'memenuhi'
+  ).length;
+
+  return Math.round((passed / 5) * 100);
+
+}
+
+function progressBar(p){
+
+  const value = participantProgress(p);
+
+  return `
+    <div class="progress-mini">
+      <div class="progress-mini-head">
+        <span>${value}%</span>
+      </div>
+
+      <div class="progress-track">
+        <div
+          class="progress-fill"
+          style="width:${value}%">
+        </div>
+      </div>
+    </div>
+  `;
+
+}
+
+function renderStats(){
+
+  const total = participants.length;
+
+  const good = participants.filter(
+    p => p.complete && !p.needs_attention
+  ).length;
+
+  const attention = participants.filter(
+    p => p.needs_attention
+  ).length;
+
+  const progressValues = participants.map(
+    participantProgress
+  );
+
+  const averageProgress = progressValues.length
+    ? Math.round(
+        progressValues.reduce((a,b) => a+b,0) /
+        progressValues.length
+      )
+    : 0;
+
+  $('statParticipants').textContent = total;
+  $('statGood').textContent = good;
+  $('statAttention').textContent = attention;
+
+  $('statProgress').textContent =
+    `${averageProgress}% rata-rata progres`;
+
+  const success = total
+    ? Math.round((good / total) * 100)
+    : 0;
+
+  $('statSuccess').textContent = `${success}%`;
+
+  $('summaryParticipants').textContent = total;
+  $('summaryGood').textContent = good;
+  $('summaryAttention').textContent = attention;
+  $('summarySuccess').textContent = `${success}%`;
+  $('summaryProgressFill').style.width = `${success}%`;
+
+}
+
+function getMonthKey(value){
+
+  return String(value || '')
+    .trim()
+    .toLowerCase();
+
+}
+
+function getAllMonths(){
+
+  const months = [];
+
+  participants.forEach(p => {
+
+    (p.history || []).forEach(e => {
+
+      if(e.month && !months.includes(e.month)){
+        months.push(e.month);
+      }
+
+    });
+
+  });
+
+  return months;
+
+}
+
+function destroyCharts(){
+
+  charts.forEach(c => c.destroy());
+
+  charts = [];
+
+}
+
+function getMonthlyEvaluations(month){
+
+  const rows = [];
+
+  participants.forEach(p => {
+
+    const history = p.history || [];
+
+    const filtered = history.filter(e =>
+      getMonthKey(e.month) === getMonthKey(month)
+    );
+
+    if(!filtered.length) return;
+
+    filtered.sort((a,b) =>
+      Number(a.week || 0) - Number(b.week || 0) ||
+      Number(a.id || 0) - Number(b.id || 0)
+    );
+
+    rows.push({
+      participant:p,
+      evaluation:filtered[filtered.length - 1]
+    });
+
+  });
+
+  return rows;
+
+}
+
+function average(values){
+
+  const numbers = values
+    .map(Number)
+    .filter(v => Number.isFinite(v));
+
+  if(!numbers.length) return 0;
+
+  return numbers.reduce((a,b) => a+b,0) /
+         numbers.length;
+
+}
+
+function normalizeScore(value,min,max){
+
+  if(!Number.isFinite(value)){
+    return 0;
+  }
+
+  if(max === min){
+    return 50;
+  }
+
+  return Math.max(
+    0,
+    Math.min(
+      100,
+      ((value - min) / (max - min)) * 100
+    )
+  );
+
+}
+
+function renderMonthlySpider(){
+  const canvas = $('monthlySpiderChart');
+  if(!canvas) return;
+
+  charts.forEach(c => c.destroy());
+  charts = [];
+
+  let month = $('chartMonth')?.value || 'latest';
+  const months = getAllMonths();
+  if(month === 'latest') month = months.at(-1) || '';
+
+  const rows = [];
+  const uniqueParticipants = new Set();
+
+  participants.forEach(p => {
+    const history = (p.history || [])
+      .filter(e => getMonthKey(e.month) === getMonthKey(month))
+      .reduce((map,e) => {
+        const week = Number(e.week || 0);
+        if(!week) return map;
+        if(!map[week] || Number(e.id || 0) > Number(map[week].id || 0)) map[week] = e;
+        return map;
+      }, {});
+
+    Object.values(history).forEach(e => {
+      rows.push({participant:p, evaluation:e});
+      if(p.id !== undefined) uniqueParticipants.add(p.id);
+    });
+  });
+
+  $('chartParticipantCount').textContent = uniqueParticipants.size;
+  $('chartEvaluationCount').textContent = rows.length;
+
+  const scores = {sit:[], one:[], toe:[], grip:[]};
+  const ages = participants
+    .map(p => Number(p.age))
+    .filter(Number.isFinite);
+
+  rows.forEach(({participant:p, evaluation:e}) => {
+    const s = p.standard;
+    if(!s) return;
+
+    if(e.sit_stand !== null && e.sit_stand !== undefined){
+      const value = Number(e.sit_stand);
+      const min = Number(s.sit_fast_max);
+      const max = Number(s.sit_slow_min);
+      if(Number.isFinite(value) && Number.isFinite(min) && Number.isFinite(max)){
+        scores.sit.push(100 - normalizeScore(value,min,max));
+      }
+    }
+
+    if(e.one_leg !== null && e.one_leg !== undefined){
+      const value = Number(e.one_leg);
+      const min = Number(s.one_normal_min);
+      const max = Number(s.one_good_min);
+      if(Number.isFinite(value) && Number.isFinite(min) && Number.isFinite(max)){
+        scores.one.push(normalizeScore(value,min,max));
+      }
+    }
+
+    if(e.toe_touch !== null && e.toe_touch !== undefined){
+      const value = Number(e.toe_touch);
+      const target = Number(s.toe_touch_standard);
+      if(Number.isFinite(value) && Number.isFinite(target) && target > 0){
+        scores.toe.push(Math.min(100,(value / target) * 100));
+      }
+    }
+
+    const grips = [Number(e.grip_right),Number(e.grip_left)]
+      .filter(Number.isFinite);
+    const gripStandard = Number(s.grip_standard);
+    if(grips.length && Number.isFinite(gripStandard) && gripStandard > 0){
+      const averageGrip = grips.reduce((a,b) => a+b,0) / grips.length;
+      scores.grip.push(Math.min(100,(averageGrip / gripStandard) * 100));
+    }
+  });
+
+  const evaluationValues = [
+    Math.round(average(scores.sit)),
+    Math.round(average(scores.one)),
+    Math.round(average(scores.toe)),
+    Math.round(average(scores.grip))
+  ].map(v => Number.isFinite(v) ? v : 0);
+
+  const averageAge = ages.length
+    ? (ages.reduce((a,b) => a+b,0) / ages.length).toFixed(1).replace('.0','')
+    : '-';
+
+  $('chartTitle').textContent = 'Perbandingan Standar & Hasil Evaluasi';
+  $('chartDescription').textContent =
+    `Standar keberhasilan berdasarkan usia peserta (rata-rata umur ${averageAge} tahun) dibandingkan dengan rata-rata hasil evaluasi.`;
+
+  const ctx = canvas.getContext('2d');
+
+  charts.push(new Chart(ctx,{
+    type:'bar',
+    data:{
+      labels:['Duduk-Berdiri','Keseimbangan','Fleksibilitas','Genggaman'],
+      datasets:[
+        {
+          label:'Standar Keberhasilan',
+          data:[100,100,100,100],
+          backgroundColor:'rgba(15,118,110,0.18)',
+          borderColor:'#0f766e',
+          borderWidth:1.5,
+          borderRadius:6,
+          maxBarThickness:30
+        },
+        {
+          label:'Hasil Evaluasi',
+          data:evaluationValues,
+          backgroundColor:'rgba(37,99,235,0.72)',
+          borderColor:'#2563eb',
+          borderWidth:1.5,
+          borderRadius:6,
+          maxBarThickness:30
+        }
+      ]
+    },
+    options:{
+      responsive:true,
+      maintainAspectRatio:false,
+      animation:{duration:500},
+      interaction:{intersect:false,mode:'index'},
+      plugins:{
+        legend:{
+          display:true,
+          position:'top',
+          align:'start',
+          labels:{
+            boxWidth:9,
+            boxHeight:9,
+            usePointStyle:true,
+            padding:12,
+            font:{family:'Plus Jakarta Sans',size:9,weight:'600'}
+          }
+        },
+        tooltip:{
+          padding:8,
+          titleFont:{family:'Plus Jakarta Sans',size:10,weight:'700'},
+          bodyFont:{family:'Plus Jakarta Sans',size:10},
+          callbacks:{
+            label:context => ` ${context.dataset.label}: ${context.raw}%`
+          }
+        }
+      },
+      scales:{
+        x:{
+          grid:{display:false},
+          ticks:{font:{family:'Plus Jakarta Sans',size:9,weight:'600'}}
+        },
+        y:{
+          beginAtZero:true,
+          min:0,
+          max:100,
+          ticks:{
+            stepSize:20,
+            callback:value => `${value}%`,
+            font:{family:'Plus Jakarta Sans',size:9}
+          },
+          grid:{color:'rgba(148,163,184,0.16)'}
+        }
+      }
+    }
+  }));
+}
+function showMovementChart(movement){
+
+  currentMovement = movement;
+
+  const spiderWrapper = $('spiderChartWrapper');
+  const movementWrapper = $('movementChartWrapper');
+
+  if(!spiderWrapper || !movementWrapper) return;
+
+  if(movement === 'all'){
+
+    spiderWrapper.style.display = 'flex';
+
+    movementWrapper.style.display = 'none';
+
+    $('chartTitle').textContent =
+      'Rata-rata Hasil Gerakan';
+
+    $('chartDescription').textContent =
+      'Profil rata-rata seluruh peserta pada periode yang dipilih.';
+
+    renderMonthlySpider();
+
+    return;
+
+  }
+
+  spiderWrapper.style.display = 'none';
+
+  movementWrapper.style.display = 'block';
+
+  const titles = {
+
+    sit_stand: 'Duduk-Berdiri',
+
+    one_leg: '1 Kaki',
+
+    toe_touch: 'Jangkauan',
+
+    grip: 'Genggaman'
+
+  };
+
+  $('chartTitle').textContent =
+    `Perkembangan ${titles[movement] || 'Gerakan'}`;
+
+  $('chartDescription').textContent =
+    'Perkembangan hasil evaluasi berdasarkan minggu.';
+
+  renderMovementProgress();
+
+}
+
+function renderMovementProgress(){
+
+  const canvas = $('movementProgressChart');
+  if(!canvas) return;
+  if(movementChart){
+    movementChart.destroy();
+    movementChart = null;
+  }
+
+  let selectedMonth =
+    $('chartMonth')?.value || 'latest';
+  const months = getAllMonths();
+  if(selectedMonth === 'latest'){
+    selectedMonth =
+      months.length
+        ? months[months.length - 1]
+        : '';
+  }
+
+  const rows = [];
+  participants.forEach(p => {
+    (p.history || []).forEach(e => {
+      if(
+        selectedMonth &&
+        getMonthKey(e.month) !==
+        getMonthKey(selectedMonth)
+      ){
+        return;
+      }
+      rows.push({
+        participant:p,
+        evaluation:e
+      });
+
+    });
+
+  });
+
+  const uniqueParticipants =
+    new Set(
+      rows.map(x => x.participant.id)
+    );
+  $('chartParticipantCount').textContent =
+    uniqueParticipants.size;
+  $('chartEvaluationCount').textContent =
+    rows.length;
+
+  if(!rows.length){
+    const ctx =
+      canvas.getContext('2d');
+    ctx.clearRect(
+      0,
+      0,
+      canvas.width,
+      canvas.height
+    );
+    return;
+  }
+
+  const weeklyData = {};
+  rows.forEach(x => {
+    const week =
+      Number(x.evaluation.week || 0);
+    if(!weeklyData[week]){
+      weeklyData[week] = [];
+    }
+    weeklyData[week].push(x.evaluation);
+  });
+  const weeks =
+    Object.keys(weeklyData)
+      .map(Number)
+      .sort((a,b) => a - b);
+  const labels =
+    weeks.map(
+      week => `M${week}`
+    );
+
+  const weeklyAverage = (week, field) => {
+    const values =
+      weeklyData[week]
+        .map(e => Number(e[field]))
+        .filter(v => Number.isFinite(v));
+    if(!values.length) return null;
+    return values.reduce(
+      (sum, value) => sum + value,
+      0
+    ) / values.length;
+  };
+  let datasets = [];
+
+  if(currentMovement === 'sit_stand'){
+    datasets = [
+      {
+        label:'Duduk-Berdiri',
+        data:weeks.map(
+          week =>
+            weeklyAverage(
+              week,
+              'sit_stand'
+            )
+        ),
+        borderWidth:2,
+        pointRadius:4,
+        tension:.3,
+        spanGaps:true
+      }
+    ];
+  }
+
+  else if(currentMovement === 'one_leg'){
+    datasets = [
+      {
+        label:'1 Kaki',
+        data:weeks.map(
+          week =>
+            weeklyAverage(
+              week,
+              'one_leg'
+            )
+        ),
+        borderWidth:2,
+        pointRadius:4,
+        tension:.3,
+        spanGaps:true
+      }
+    ];
+  }
+
+  else if(currentMovement === 'toe_touch'){
+    datasets = [
+      {
+        label:'Jangkauan',
+        data:weeks.map(
+          week =>
+            weeklyAverage(
+              week,
+              'toe_touch'
+            )
+        ),
+        borderWidth:2,
+        pointRadius:4,
+        tension:.3,
+        spanGaps:true
+      }
+    ];
+  }
+
+  else if(currentMovement === 'grip'){
+    datasets = [
+      {
+        label:'Grip Kanan',
+        data:weeks.map(
+          week =>
+            weeklyAverage(
+              week,
+              'grip_right'
+            )
+        ),
+        borderWidth:2,
+        pointRadius:4,
+        tension:.3,
+        spanGaps:true
+      },
+      {
+        label:'Grip Kiri',
+        data:weeks.map(
+          week =>
+            weeklyAverage(
+              week,
+              'grip_left'
+            )
+        ),
+        borderWidth:2,
+        pointRadius:4,
+        tension:.3,
+        spanGaps:true
+      }
+    ];
+  }
+
+  movementChart =
+    new Chart(
+      canvas,
+      {
+        type:'line',
+        data:{
+          labels:labels,
+          datasets:datasets
+        },
+        options:{
+          responsive:true,
+          maintainAspectRatio:false,
+          interaction:{
+            intersect:false,
+            mode:'index'
+          },
+
+          plugins:{
+            legend:{
+              display:
+                currentMovement === 'grip',
+              position:'top',
+              align:'start',
+              labels:{
+                boxWidth:9,
+                boxHeight:9,
+                usePointStyle:true,
+                padding:12,
+                font:{
+                  size:9
+                }
+              }
+            },
+
+            tooltip:{
+              padding:8,
+              titleFont:{
+                size:10
+              },
+              bodyFont:{
+                size:10
+              },
+              callbacks:{
+                label:function(context){
+                  return `${context.dataset.label}: ${Number(context.raw).toFixed(1)}`;
+                }
+              }
+            }
+          },
+
+          scales:{
+            x:{
+              grid:{
+                display:false
+              },
+              ticks:{
+                font:{
+                  size:9
+                }
+              }
+            },
+            y:{
+              beginAtZero:false,
+              ticks:{
+                font:{
+                  size:9
+                }
+              }
+            }
+          }
+        }
+      }
+    );
+}
+
+function renderDashboardCharts(){
+
+  if(currentMovement === 'all'){
+
+    renderMonthlySpider();
+
+  }else{
+
+    renderMovementProgress();
+
+  }
+
+}
+
+function renderMonthFilter(){
+
+  const select = $('chartMonth');
+
+  if(!select) return;
+
+  const months = getAllMonths();
+
+  select.innerHTML =
+    `<option value="latest">Bulan terbaru</option>` +
+    months.map(m =>
+      `<option value="${esc(m)}">${esc(m)}</option>`
+    ).join('');
+
+}
+
+let currentStatType = 'participants';
+
+function openStatModal(type){
+
+  currentStatType = type;
+
+  $('statSearch').value = '';
+  $('statFilter').value = 'all';
+
+  if(type === 'participants'){
+
+    $('statModalTitle').textContent =
+      'Total Peserta';
+
+    $('statModalDescription').textContent =
+      'Daftar seluruh peserta beserta progres evaluasi.';
+
+  }
+
+  if(type === 'good'){
+
+    $('statModalTitle').textContent =
+      'Peserta Memenuhi Semua Tes';
+
+    $('statModalDescription').textContent =
+      'Peserta yang seluruh hasil evaluasi terbarunya memenuhi standar.';
+
+    $('statFilter').value = 'good';
+
+  }
+
+  if(type === 'attention'){
+
+    $('statModalTitle').textContent =
+      'Peserta Perlu Perhatian';
+
+    $('statModalDescription').textContent =
+      'Peserta yang masih memiliki hasil di bawah standar.';
+
+    $('statFilter').value = 'attention';
+
+  }
+
+  $('statModal').classList.add('show');
+
+  renderStatModal();
+
+}
+
+function renderStatModal(){
+
+  const q =
+    $('statSearch').value
+      .trim()
+      .toLowerCase();
+
+  const filter =
+    $('statFilter').value;
+
+  let rows = participants.filter(p =>
+    p.name.toLowerCase().includes(q)
+  );
+
+  if(currentStatType === 'good'){
+    rows = rows.filter(
+      p => p.complete && !p.needs_attention
+    );
+  }
+
+  if(currentStatType === 'attention'){
+    rows = rows.filter(
+      p => p.needs_attention
+    );
+  }
+
+  if(filter === 'good'){
+    rows = rows.filter(
+      p => p.complete && !p.needs_attention
+    );
+  }
+
+  if(filter === 'attention'){
+    rows = rows.filter(
+      p => p.needs_attention
+    );
+  }
+
+  if(filter === 'incomplete'){
+    rows = rows.filter(
+      p => !p.complete
+    );
+  }
+
+  $('statModalContent').innerHTML = rows.length
+
+    ? rows.map(p => {
+
+        const e = p.latest_evaluation;
+
+        const progress =
+          participantProgress(p);
+
+        const statusText =
+          !e
+            ? 'Belum ada evaluasi'
+            : p.needs_attention
+              ? 'Perlu perhatian'
+              : p.complete
+                ? 'Memenuhi standar'
+                : 'Belum lengkap';
+
+        const cls =
+          p.needs_attention
+            ? 'badge-warn'
+            : p.complete
+              ? 'badge-good'
+              : 'badge-neutral';
+
+        return `
+          <div class="participant-summary">
+
+            <div class="participant-summary-main">
+
+              <div class="participant-summary-name">
+                <b>${esc(p.name)}</b>
+
+                <span class="badge ${cls}">
+                  ${statusText}
+                </span>
+              </div>
+
+              <div class="participant-summary-meta">
+                ${p.age} tahun · ${genderLabel(p.gender)}
+                ${e ? ` · M${e.week} · ${esc(e.month || '-')}` : ''}
+              </div>
+
+              ${progressBar(p)}
+
+            </div>
+
+            <div class="participant-summary-actions">
+
+              <button
+                class="btn btn-primary btn-small"
+                onclick="closeModal('statModal');openDetail(${p.id})">
+                Detail
+              </button>
+
+            </div>
+
+          </div>
+        `;
+
+      }).join('')
+
+    : `
+      <div class="empty">
+        Tidak ada peserta yang sesuai.
+      </div>
+    `;
+
+}
+
+function openParticipantList(){
+
+  $('participantListModal').classList.add('show');
+
+  renderParticipantPage();
+
+}
+
+function renderParticipantPage(){
+
+  const q =
+    $('participantPageSearch').value
+      .trim()
+      .toLowerCase();
+
+  const filter =
+    $('participantPageFilter').value;
+
+  let rows = participants.filter(p =>
+    p.name.toLowerCase().includes(q)
+  );
+
+  if(filter === 'good'){
+
+    rows = rows.filter(
+      p => p.complete && !p.needs_attention
+    );
+
+  }
+
+  if(filter === 'attention'){
+
+    rows = rows.filter(
+      p => p.needs_attention
+    );
+
+  }
+
+  if(filter === 'incomplete'){
+
+    rows = rows.filter(
+      p => !p.complete
+    );
+
+  }
+
+  $('participantPageRows').innerHTML = rows.length
+
+    ? rows.map(p => {
+
+        const e = p.latest_evaluation;
+
+        const progress =
+          participantProgress(p);
+
+        const statusText =
+          !e
+            ? 'Belum ada evaluasi'
+            : p.needs_attention
+              ? 'Perlu perhatian'
+              : p.complete
+                ? 'Memenuhi standar'
+                : 'Belum lengkap';
+
+        const cls =
+          p.needs_attention
+            ? 'badge-warn'
+            : p.complete
+              ? 'badge-good'
+              : 'badge-neutral';
+
+        return `
+          <tr>
+
+            <td class="name-cell">
+              <b>${esc(p.name)}</b>
+              <span>
+                ${genderLabel(p.gender)}
+              </span>
+            </td>
+
+            <td>${p.age}</td>
+
+            <td style="min-width:130px">
+              ${progressBar(p)}
+            </td>
+
+            <td>
+              ${
+                e
+                  ? `M${e.week} · ${esc(e.month || '-')}`
+                  : '-'
+              }
+            </td>
+
+            <td>
+              <span class="badge ${cls}">
+                ${statusText}
+              </span>
+            </td>
+
+            <td>
+
+              <button
+                class="btn btn-primary btn-small"
+                onclick="closeModal('participantListModal');openDetail(${p.id})">
+                Detail
+              </button>
+
+            </td>
+
+          </tr>
+        `;
+
+      }).join('')
+
+    : `
+      <tr>
+        <td colspan="6" class="empty">
+          Tidak ada peserta.
+        </td>
+      </tr>
+    `;
+
+}
+
+function renderStandards(){
+
+  const make = g =>
+    standards
+      .filter(s => s.gender === g)
+      .map(s => `
+        <tr>
+
+          <td>
+            ${s.age_min}–${s.age_max}
+          </td>
+
+          <td>
+            ≤${fmt(s.sit_fast_max)}
+            /
+            ${fmt(s.sit_normal_min)}–${fmt(s.sit_normal_max)}
+            /
+            ≥${fmt(s.sit_slow_min)}
+          </td>
+
+          <td>
+            ≤${fmt(s.one_low_max)}
+            /
+            ${fmt(s.one_normal_min)}–${fmt(s.one_normal_max)}
+            /
+            ≥${fmt(s.one_good_min)}
+          </td>
+
+          <td>
+            ≥${fmt(s.toe_touch_standard)}
+          </td>
+
+          <td>
+            ${
+              s.grip_standard === null
+                ? '-'
+                : '≥' + fmt(s.grip_standard)
+            }
+          </td>
+
+        </tr>
+      `)
+      .join('');
+
+  $('standardMale').innerHTML =
+    make('pria');
+
+  $('standardFemale').innerHTML =
+    make('wanita');
+
+}
+
+function openStandardModal(){
+
+  $('standardModal').classList.add('show');
+
+}
+
+function getExerciseGroups(){
+
+  return [
+
+    [
+      'Peregangan',
+      [
+        'peregangan putaran pinggang',
+        'peregangan betis',
+        'latihan ekstensi kaki',
+        'latihan membungkuk ke depan',
+        'Peregangan satu kaki sambil berdiri',
+        'Silang berdiri membungkuk ke depan'
+      ]
+    ],
+
+    [
+      'Latihan otot',
+      [
+        'pelatihan angkat kaki',
+        'latihan sepak terjang',
+        'Pelatihan kekuatan inti',
+        'pelatihan jongkok',
+        'Latihan gooper (memperkuat kekuatan genggaman)'
+      ]
+    ]
+
+  ];
+
+}
+
+function renderMenu(){
+  const groups = getExerciseGroups();
+  $('menuModalList').innerHTML = groups.map(
+    g => `
+      <div class="menu-group">
+        <div class="menu-group-head">
+          <div class="menu-group-icon">
+            🤸
+          </div>
+          <div>
+            <h4>${esc(g[0])}</h4>
+            <span>${g[1].length} jenis latihan</span>
+          </div>
+        </div>
+        <div class="menu-tags">
+          ${g[1].map((x, index) => `
+            <div class="menu-exercise">
+              <span class="menu-exercise-number">
+                ${index + 1}
+              </span>
+              <span class="menu-exercise-name">
+                ${esc(x)}
+              </span>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `
+  ).join('');
+}
+
+function openMenuModal(){
+
+  renderMenu();
+  $('menuModal').classList.add('show');
+
+}
+
+function openParticipantChoice(){
+
+  $('participantChoiceModal').classList.add('show');
+
+}
+
+function resetParticipantForm(){
+
+  $('participantForm').reset();
+
+  $('participantId').value = '';
+
+  $('participantModalTitle').textContent =
+    'Tambah Peserta';
+
+  $('week').value = 1;
+
+  document
+    .querySelectorAll('#participantForm .field')
+    .forEach(field => {
+      field.style.display = '';
+    });
+
+}
+
+function openManualParticipant(){
+
+  closeModal('participantChoiceModal');
+
+  resetParticipantForm();
+
+  $('participantModal').classList.add('show');
+
+}
+
+function openExcelImport(){
+
+  closeModal('participantChoiceModal');
+
+  $('excelModal').classList.add('show');
+
+}
+
+async function uploadExcel(){
+
+  const file =
+    $('excelFile').files[0];
+
+  if(!file){
+
+    toast('Pilih file Excel terlebih dahulu.');
+
+    return;
+
+  }
+
+  toast(
+    'File sudah dipilih. Endpoint import Excel belum diaktifkan.'
+  );
+
+}
+
+$('participantForm').addEventListener(
+  'submit',
+  async e => {
+
+    e.preventDefault();
+
+    const id =
+      $('participantId').value;
+
+    const body = {
+
+      name:$('name').value,
+
+      age:$('age').value,
+
+      gender:$('gender').value,
+
+      month:$('month').value,
+
+      week:$('week').value,
+
+      sit_stand:$('sit_stand').value,
+
+      one_leg:$('one_leg').value,
+
+      toe_touch:$('toe_touch').value,
+
+      grip_right:$('grip_right').value,
+
+      grip_left:$('grip_left').value
+
+    };
+
+    try{
+
+      await api(
+        id
+          ? `/api/participants/${id}`
+          : '/api/participants',
+        {
+          method:id ? 'PUT' : 'POST',
+          body:JSON.stringify(body)
+        }
+      );
+
+      closeModal('participantModal');
+
+      await refreshAll();
+
+      if(id && currentDetailId === Number(id)){
+
+        openDetail(Number(id));
+
+      }
+
+      toast(
+        id
+          ? 'Peserta diperbarui'
+          : 'Peserta ditambahkan'
+      );
+
+    }catch(err){
+
+      toast(err.message);
+
+    }
+
+  }
+);
+
+function scoreCard(label,val){
+
+  const s = status(val);
+
+  return `
+    <div class="score ${s[2]}">
+      <small>${label}</small>
+      <b>${s[0]}</b>
+    </div>
+  `;
+
+}
+
+function openDetail(id){
+
+  const p =
+    participants.find(x => x.id === id);
+
+  if(!p) return;
+
+  currentDetailId = id;
+
+  destroyCharts();
+
+  $('detailName').textContent =
+    p.name;
+
+  $('detailMeta').textContent =
+    `${p.age} tahun · ${genderLabel(p.gender)} · ${p.history.length} evaluasi`;
+
+  const c = p.classification;
+  const r = p.recommendation;
+  const e = p.latest_evaluation;
+
+  $('detailContent').innerHTML = `
+    <div class="detail-cover">
+      <div class="detail-cover-icon">👤</div>
+      <div class="detail-cover-text">
+        <strong>${esc(p.name)}</strong>
+        <span>${p.age} tahun · ${genderLabel(p.gender)}</span>
+      </div>
+    </div>
+
+    <div class="detail-actions">
+
+      <button
+        class="btn btn-primary btn-small"
+        onclick="openEvaluationForm(${p.id})">
+        ＋ Tambah Evaluasi
+      </button>
+
+      <button
+        class="btn btn-soft btn-small"
+        onclick="editParticipant(${p.id})">
+        ✏️ Edit Peserta
+      </button>
+
+      <button
+        class="btn btn-danger btn-small"
+        onclick="deleteParticipant(${p.id})">
+        🗑️ Hapus Peserta
+      </button>
+
+    </div>
+
+    <div class="detail-top">
+
+      <div class="score-grid">
+
+        ${scoreCard(
+          'Duduk-Berdiri',
+          c.sit_stand
+        )}
+
+        ${scoreCard(
+          '1 Kaki',
+          c.one_leg
+        )}
+
+        ${scoreCard(
+          'Jangkauan',
+          c.toe_touch
+        )}
+
+        ${scoreCard(
+          'Grip Kanan',
+          c.grip_right
+        )}
+
+        ${scoreCard(
+          'Grip Kiri',
+          c.grip_left
+        )}
+
+      </div>
+
+      <div class="detail-progress-box">
+
+        <div>
+          <span>Progress peserta</span>
+          <b>${participantProgress(p)}%</b>
+        </div>
+
+        <div class="progress-track">
+          <div
+            class="progress-fill"
+            style="width:${participantProgress(p)}%">
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <div class="detail-note">
+
+      Evaluasi terbaru:
+      <b>
+        ${
+          e
+            ? `Minggu ${e.week} · ${esc(e.month || '-')}`
+            : 'belum ada'
+        }
+      </b>
+
+    </div>
+
+    <h4 style="margin:18px 0 8px">
+      Grafik peningkatan mingguan
+    </h4>
+
+    <div class="chart-grid">
+
+      <div class="chart-card">
+        <h4>Duduk-Berdiri 10×</h4>
+        <canvas id="chartSit"></canvas>
+      </div>
+
+      <div class="chart-card">
+        <h4>Berdiri 1 Kaki</h4>
+        <canvas id="chartOne"></canvas>
+      </div>
+
+      <div class="chart-card">
+        <h4>Jangkauan</h4>
+        <canvas id="chartToe"></canvas>
+      </div>
+
+      <div class="chart-card">
+        <h4>Genggaman</h4>
+        <canvas id="chartGrip"></canvas>
+      </div>
+
+    </div>
+
+    <div class="detail-rec">
+
+      <h4>${esc(r.title)}</h4>
+
+      <div class="rec-message">
+        ${esc(r.message)}
+      </div>
+
+      ${
+        r.items.length
+
+          ? r.items.map(x => `
+
+              <div class="detail-rec-item">
+
+                <b>
+                  ${esc(x.priority)}
+                  ·
+                  ${esc(x.focus)}
+                </b>
+
+                <div
+                  class="rec-message"
+                  style="margin-top:4px">
+
+                  ${esc(x.reason)}
+
+                </div>
+
+                ${
+                  x.exercises?.length
+
+                    ? `
+
+                      <div class="exercise-list">
+
+                        ${x.exercises.map(ex => `
+
+                          <div class="exercise-card">
+
+                            <div class="exercise-name">
+                              🏃 ${esc(ex.name || '-')}
+                            </div>
+
+                            ${
+                              ex.dose
+                                ? `<div class="exercise-dose">
+                                    ↳ ${esc(ex.dose)}
+                                   </div>`
+                                : ''
+                            }
+
+                            ${
+                              ex.info
+                                ? `<div class="exercise-info">
+                                    ↻ ${esc(ex.info)}
+                                   </div>`
+                                : ''
+                            }
+
+                            ${
+                              ex.target
+                                ? `<div class="exercise-target">
+                                    🎯 ${esc(ex.target)}
+                                   </div>`
+                                : ''
+                            }
+
+                          </div>
+
+                        `).join('')}
+
+                      </div>
+
+                    `
+                    : ''
+                }
+
+              </div>
+
+            `).join('')
+
+          : ''
+      }
+
+    </div>
+
+  `;
+
+  $('detailModal').classList.add('show');
+
+    const h =
+    [...(p.history || [])]
+        .sort((a,b) => {
+
+        const monthA = getMonthKey(a.month);
+        const monthB = getMonthKey(b.month);
+
+        if(monthA !== monthB){
+            return monthA.localeCompare(monthB);
+        }
+
+        return Number(a.week || 0) -
+                Number(b.week || 0);
+
+        });
+
+  const labels =
+    h.map(x => `M${x.week}`);
+
+  makeChart(
+    'chartSit',
+    labels,
+    h.map(x => x.sit_stand),
+    'Duduk-Berdiri'
+  );
+
+  makeChart(
+    'chartOne',
+    labels,
+    h.map(x => x.one_leg),
+    '1 Kaki'
+  );
+
+  makeChart(
+    'chartToe',
+    labels,
+    h.map(x => x.toe_touch),
+    'Jangkauan'
+  );
+
+const grip = $('chartGrip');
+
+if(grip){
+
+  const gripWrapper = grip.parentElement;
+
+  if(gripWrapper){
+    gripWrapper.style.position = 'relative';
+    gripWrapper.style.height = '280px';
+    gripWrapper.style.minHeight = '280px';
+    gripWrapper.style.maxHeight = '280px';
+    gripWrapper.style.overflow = 'hidden';
+  }
+
+  charts.push(
+    new Chart(
+      grip,
+      {
+          type:'line',
+
+          data:{
+            labels,
+
+            datasets:[
+              {
+                label:'Kanan',
+                data:h.map(
+                  x => x.grip_right
+                ),
+                borderWidth:2,
+                tension:.3,
+                pointRadius:4
+              },
+
+              {
+                label:'Kiri',
+                data:h.map(
+                  x => x.grip_left
+                ),
+                borderWidth:2,
+                tension:.3,
+                pointRadius:4
+              }
+            ]
+          },
+
+            options:{
+            responsive:true,
+            maintainAspectRatio:false,
+
+            interaction:{
+                intersect:false,
+                mode:'index'
+            },
+
+            plugins:{
+                legend:{
+                display:true,
+                position:'top'
+                }
+            },
+
+            scales:{
+                x:{
+                title:{
+                    display:true,
+                    text:'Minggu Evaluasi'
+                },
+                grid:{
+                    display:false
+                }
+                },
+
+                y:{
+                beginAtZero:false
+                }
+            }
+            }
+        }
+      )
+    );
+
+  }
+
+}
+
+function makeChart(id, labels, values, label){
+
+  const canvas = $(id);
+
+  if(!canvas) return;
+
+  const wrapper = canvas.parentElement;
+
+  if(wrapper){
+    wrapper.style.position = 'relative';
+    wrapper.style.height = '260px';
+    wrapper.style.minHeight = '260px';
+    wrapper.style.maxHeight = '260px';
+    wrapper.style.overflow = 'hidden';
+  }
+
+  charts.push(
+    new Chart(canvas, {
+
+      type: 'line',
+
+      data: {
+        labels,
+
+        datasets: [{
+          label,
+
+          data: values.map(v =>
+            v === null || v === '' || v === undefined
+              ? null
+              : Number(v)
+          ),
+
+          borderWidth: 2.5,
+          pointRadius: 4,
+          pointHoverRadius: 6,
+
+          tension: 0.3,
+          spanGaps: true,
+          fill: true
+        }]
+      },
+
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: {
+          intersect: false,
+          mode: 'index'
+        },
+        plugins: {
+          legend: {
+            display: false
+          },
+          tooltip: {
+            padding: 8,
+            titleFont: {
+              family: 'DM Sans',
+              size: 11,
+              weight: '600'
+            },
+            bodyFont: {
+              family: 'DM Sans',
+              size: 11
+            },
+
+            callbacks: {
+              label: function(context){
+                const value = context.raw;
+                return `${label}: ${
+                  value === null
+                    ? '-'
+                    : Number(value).toFixed(1)
+                }`;
+              }
+            }
+          }
+        },
+        scales: {
+          x: {
+            title: {
+              display: true,
+              text: 'Minggu Evaluasi',
+              font: {
+                family: 'DM Sans',
+                size: 11,
+                weight: '600'
+              }
+            },
+            grid: {
+              display: false
+            },
+            ticks: {
+              font: {
+                family: 'DM Sans',
+                size: 10
+              }
+            }
+          },
+
+          y: {
+            beginAtZero: false,
+            ticks: {
+              precision: 1,
+              font: {
+                family: 'DM Sans',
+                size: 10
+              }
+            }
+          }
+        }
+      }
+    })
+  );
+}
+
+function editParticipant(id){
+  const p =
+    participants.find(x => x.id === id);
+
+  if(!p) return;
+  currentDetailId = id;
+
+  resetParticipantForm();
+  $('participantId').value =
+    p.id;
+  $('participantModalTitle').textContent =
+    'Edit Peserta';
+  $('name').value =
+    p.name;
+  $('age').value =
+    p.age;
+  $('gender').value =
+    p.gender;
+
+  document
+    .querySelectorAll('#participantForm .field')
+    .forEach(field => {
+      field.style.display = 'none';
+    });
+
+  ['name','age','gender'].forEach(id => {
+    const input = $(id);
+    const field =
+      input?.closest('.field');
+    if(field){
+      field.style.display = '';
+    }
+  });
+  $('participantModal').classList.add('show');
+}
+
+function openEvaluationForm(pid,e=null){
+  const p =
+    participants.find(x => x.id === pid);
+  if(!p) return;
+  const modal =
+    document.getElementById('evaluationModal');
+  if(modal){
+    modal.remove();
+  }
+
+  document.body.insertAdjacentHTML(
+    'beforeend',
+    `
+      <div class="modal show" id="evaluationModal">
+        <div class="modal-box">
+          <div class="modal-head">
+            <div>
+              <h3>${e ? 'Edit Evaluasi' : 'Tambah Evaluasi'}</h3>
+              <p>${esc(p.name)}</p>
+            </div>
+
+            <button
+              class="btn btn-soft btn-small"
+              onclick="closeModal('evaluationModal')">
+              ✕
+            </button>
+
+          </div>
+
+          <form id="evaluationForm">
+
+            <input
+              type="hidden"
+              id="evaluationId"
+              value="${e?.id || ''}">
+
+            <input
+              type="hidden"
+              id="evaluationParticipantId"
+              value="${pid}">
+
+            <div class="form-grid">
+
+              <div class="field">
+                <label>Bulan</label>
+                <input
+                  id="evaluationMonth"
+                  value="${esc(e?.month || '')}"
+                  placeholder="Contoh: September">
+              </div>
+
+              <div class="field">
+                <label>Minggu</label>
+                <input
+                  id="evaluationWeek"
+                  type="number"
+                  min="1"
+                  max="5"
+                  required
+                  value="${
+                    e?.week ||
+                    ((p.latest_evaluation?.week || 0) + 1)
+                  }">
+              </div>
+
+              <div class="field">
+                <label>Duduk-Berdiri 10×</label>
+                <input
+                  id="evaluationSit"
+                  type="number"
+                  step="0.1"
+                  value="${e?.sit_stand ?? ''}">
+              </div>
+
+              <div class="field">
+                <label>Berdiri 1 kaki</label>
+                <input
+                  id="evaluationOne"
+                  type="number"
+                  step="0.1"
+                  value="${e?.one_leg ?? ''}">
+              </div>
+
+              <div class="field">
+                <label>Jangkauan</label>
+                <input
+                  id="evaluationToe"
+                  type="number"
+                  step="0.1"
+                  value="${e?.toe_touch ?? ''}">
+              </div>
+
+              <div class="field">
+                <label>Grip kanan</label>
+                <input
+                  id="evaluationRight"
+                  type="number"
+                  step="0.1"
+                  value="${e?.grip_right ?? ''}">
+              </div>
+              <div class="field">
+                <label>Grip kiri</label>
+                <input
+                  id="evaluationLeft"
+                  type="number"
+                  step="0.1"
+                  value="${e?.grip_left ?? ''}">
+              </div>
+            </div>
+            <div class="form-actions">
+              <button
+                type="button"
+                class="btn btn-soft"
+                onclick="closeModal('evaluationModal')">
+                Batal
+              </button>
+              <button class="btn btn-primary">
+                Simpan Evaluasi
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    `
+  );
+
+  document
+    .getElementById('evaluationForm')
+    .addEventListener(
+      'submit',
+      async event => {
+        event.preventDefault();
+        const id =
+          $('evaluationId').value;
+        const participantId =
+          $('evaluationParticipantId').value;
+        const body = {
+          month:
+            $('evaluationMonth').value,
+          week:
+            $('evaluationWeek').value,
+          sit_stand:
+            $('evaluationSit').value,
+          one_leg:
+            $('evaluationOne').value,
+          toe_touch:
+            $('evaluationToe').value,
+          grip_right:
+            $('evaluationRight').value,
+          grip_left:
+            $('evaluationLeft').value
+        };
+        try{
+          await api(
+            id
+              ? `/api/evaluations/${id}`
+              : `/api/participants/${participantId}/evaluations`,
+            {
+              method:id ? 'PUT' : 'POST',
+              body:JSON.stringify(body)
+            }
+          );
+          closeModal('evaluationModal');
+          await refreshAll();
+          openDetail(Number(participantId));
+          toast(
+            id
+              ? 'Evaluasi diperbarui'
+              : 'Evaluasi ditambahkan'
+          );
+        }catch(err){
+          toast(err.message);
+        }
+      }
+    );
+}
+
+async function deleteParticipant(id){
+  const p =
+    participants.find(x => x.id === id);
+  if(
+    !p ||
+    !confirm(
+      `Hapus ${p.name} beserta seluruh riwayat evaluasinya?`
+    )
+  ) return;
+  try{
+    await api(
+      `/api/participants/${id}`,
+      {
+        method:'DELETE'
+      }
+    );
+    const wasDetailOpen =
+      $('detailModal')?.classList.contains('show');
+    if(wasDetailOpen){
+      closeDetail(false);
+    }
+    await refreshAll();
+    if($('participantListModal')){
+      $('participantListModal').classList.add('show');
+      renderParticipantPage();
+    }
+    toast('Peserta dihapus');
+  }catch(e){
+    toast(e.message);
+  }
+}
+
+async function refreshAll(){
+  try{
+    participants =
+      await api('/api/participants');
+    standards =
+      await api('/api/standards');
+    renderStats();
+    renderMonthFilter();
+    renderDashboardCharts();
+    renderStandards();
+    renderMenu();
+  }catch(e){
+    console.error(e);
+    toast(e.message);
+  }
+}
+[
+  'participantChoiceModal',
+  'statModal',
+  'participantListModal',
+  'standardModal',
+  'menuModal',
+  'participantModal',
+  'excelModal',
+  'detailModal'
+].forEach(id => {
+  const el = $(id);
+  if(!el) return;
+  el.addEventListener(
+    'click',
+    e => {
+      if(e.target.id === id){
+        closeModal(id)
+      }
+    }
+  );
+});
+refreshAll();
+</script>
+
+</body>
+</html>
