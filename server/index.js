@@ -2385,6 +2385,1633 @@ function drawPdfBarChart(doc, title, items) {
     graphBottom + 55;
 }
 
+function compareEvaluationValues(
+  previous,
+  current,
+  standard
+){
+
+  const metrics = [
+
+    {
+      key: "sit_stand",
+      label: "Duduk-Berdiri 10×",
+      unit: "detik",
+      lowerIsBetter: true
+    },
+
+    {
+      key: "one_leg",
+      label: "Berdiri 1 Kaki",
+      unit: "detik",
+      lowerIsBetter: false
+    },
+
+    {
+      key: "toe_touch",
+      label: "Jangkauan / Membungkuk",
+      unit: "cm",
+      lowerIsBetter: false
+    },
+
+    {
+      key: "grip_right",
+      label: "Genggaman Kanan",
+      unit: "kg",
+      lowerIsBetter: false
+    },
+
+    {
+      key: "grip_left",
+      label: "Genggaman Kiri",
+      unit: "kg",
+      lowerIsBetter: false
+    }
+
+  ];
+
+
+  return metrics.map(metric => {
+
+    const oldValue =
+      cleanNumber(
+        previous?.[metric.key]
+      );
+
+    const newValue =
+      cleanNumber(
+        current?.[metric.key]
+      );
+
+
+    if(
+      oldValue === null ||
+      newValue === null
+    ){
+
+      return {
+
+        ...metric,
+
+        previous: oldValue,
+
+        current: newValue,
+
+        difference: null,
+
+        direction: "none",
+
+        result: "Tidak dapat dibandingkan"
+
+      };
+
+    }
+
+
+    const difference =
+      newValue - oldValue;
+
+
+    let direction =
+      "same";
+
+
+    if(
+      Math.abs(difference) < 0.0001
+    ){
+
+      direction =
+        "same";
+
+    }
+
+    else if(metric.lowerIsBetter){
+
+      direction =
+        difference < 0
+          ? "better"
+          : "worse";
+
+    }
+
+    else{
+
+      direction =
+        difference > 0
+          ? "better"
+          : "worse";
+
+    }
+
+
+    return {
+
+      ...metric,
+
+      previous: oldValue,
+
+      current: newValue,
+
+      difference,
+
+      direction,
+
+      result:
+        direction === "better"
+          ? "Membaik"
+          : direction === "worse"
+            ? "Menurun"
+            : "Tetap"
+
+    };
+
+  });
+
+}
+
+// =====================================================
+// PERBANDINGAN KELOMPOK / RATA-RATA MINGGUAN
+// =====================================================
+
+function periodKey(month, week) {
+  const raw = String(month || "").trim().toLowerCase();
+  const weekNumber = Number(week || 0);
+
+  // YYYY-MM lebih aman untuk urutan lintas tahun.
+  if (/^\d{4}-\d{2}$/.test(raw)) {
+    const [year, monthNumber] = raw.split("-").map(Number);
+    return year * 10000 + monthNumber * 10 + weekNumber;
+  }
+
+  // Untuk nama bulan, gunakan urutan bulan yang sudah dipakai aplikasi.
+  return monthOrder(raw) * 10 + weekNumber;
+}
+
+function getPreviousEvaluationPeriod(month, week) {
+  const currentKey = periodKey(month, week);
+
+  const periods = db.prepare(`
+    SELECT DISTINCT month, week
+    FROM evaluations
+    WHERE TRIM(month) <> ''
+  `).all();
+
+  const previous = periods
+    .filter(row => periodKey(row.month, row.week) < currentKey)
+    .sort((a, b) => {
+      return periodKey(b.month, b.week) - periodKey(a.month, a.week);
+    })[0];
+
+  return previous || null;
+}
+
+function getGroupComparisonData(month, week) {
+  const currentMonth = String(month || "").trim();
+  const currentWeek = Number(week);
+
+  if (!currentMonth || !Number.isFinite(currentWeek) || currentWeek < 1) {
+    return null;
+  }
+
+  const previousPeriod = getPreviousEvaluationPeriod(
+    currentMonth,
+    currentWeek
+  );
+
+  if (!previousPeriod) {
+    return {
+      currentPeriod: {
+        month: currentMonth,
+        week: currentWeek
+      },
+      previousPeriod: null,
+      participants: [],
+      comparison: [],
+      totalParticipants: 0,
+      currentParticipants: 0,
+      previousParticipants: 0,
+      comparableParticipants: 0
+    };
+  }
+
+  const participants = db.prepare(`
+    SELECT *
+    FROM participants
+    ORDER BY name COLLATE NOCASE ASC
+  `).all();
+
+  const currentRows = db.prepare(`
+    SELECT *
+    FROM evaluations
+    WHERE month = ? AND week = ?
+  `).all(currentMonth, currentWeek);
+
+  const previousRows = db.prepare(`
+    SELECT *
+    FROM evaluations
+    WHERE month = ? AND week = ?
+  `).all(previousPeriod.month, previousPeriod.week);
+
+  const currentMap = new Map(
+    currentRows.map(row => [Number(row.participant_id), row])
+  );
+
+  const previousMap = new Map(
+    previousRows.map(row => [Number(row.participant_id), row])
+  );
+
+  const metrics = [
+    {
+      key: "sit_stand",
+      label: "Duduk-Berdiri 10×",
+      unit: "detik",
+      lowerIsBetter: true
+    },
+    {
+      key: "one_leg",
+      label: "Berdiri 1 Kaki",
+      unit: "detik",
+      lowerIsBetter: false
+    },
+    {
+      key: "toe_touch",
+      label: "Jangkauan / Membungkuk",
+      unit: "cm",
+      lowerIsBetter: false
+    },
+    {
+      key: "grip_right",
+      label: "Genggaman Kanan",
+      unit: "kg",
+      lowerIsBetter: false
+    },
+    {
+      key: "grip_left",
+      label: "Genggaman Kiri",
+      unit: "kg",
+      lowerIsBetter: false
+    }
+  ];
+
+  const pairedParticipants = participants.filter(p => {
+    return currentMap.has(Number(p.id)) && previousMap.has(Number(p.id));
+  });
+
+  const comparison = metrics.map(metric => {
+    const previousValues = [];
+    const currentValues = [];
+    const pairedValues = [];
+
+    pairedParticipants.forEach(participant => {
+      const previousValue = cleanNumber(
+        previousMap.get(Number(participant.id))?.[metric.key]
+      );
+      const currentValue = cleanNumber(
+        currentMap.get(Number(participant.id))?.[metric.key]
+      );
+
+      if (previousValue !== null) previousValues.push(previousValue);
+      if (currentValue !== null) currentValues.push(currentValue);
+
+      if (previousValue !== null && currentValue !== null) {
+        pairedValues.push({
+          previous: previousValue,
+          current: currentValue
+        });
+      }
+    });
+
+    // Bila ada peserta yang hanya punya salah satu minggu,
+    // rata-rata tetap dihitung dari seluruh data yang tersedia.
+    // Untuk perubahan/status, digunakan peserta yang punya kedua data.
+    const average = values => {
+      if (!values.length) return null;
+      return values.reduce((sum, value) => sum + value, 0) / values.length;
+    };
+
+    const previousAverage = average(previousValues);
+    const currentAverage = average(currentValues);
+
+    const pairedPreviousAverage = average(
+      pairedValues.map(item => item.previous)
+    );
+    const pairedCurrentAverage = average(
+      pairedValues.map(item => item.current)
+    );
+
+    const difference =
+      pairedPreviousAverage !== null && pairedCurrentAverage !== null
+        ? pairedCurrentAverage - pairedPreviousAverage
+        : null;
+
+    let direction = "none";
+
+    if (difference !== null) {
+      if (Math.abs(difference) < 0.0001) {
+        direction = "same";
+      } else if (metric.lowerIsBetter) {
+        direction = difference < 0 ? "better" : "worse";
+      } else {
+        direction = difference > 0 ? "better" : "worse";
+      }
+    }
+
+    return {
+      ...metric,
+      previous: previousAverage,
+      current: currentAverage,
+      difference,
+      pairedPreviousAverage,
+      pairedCurrentAverage,
+      previousCount: previousValues.length,
+      currentCount: currentValues.length,
+      comparableCount: pairedValues.length,
+      direction,
+      result:
+        direction === "better"
+          ? "Membaik"
+          : direction === "worse"
+            ? "Menurun"
+            : direction === "same"
+              ? "Tetap"
+              : "Tidak dapat dibandingkan"
+    };
+  });
+
+  return {
+    currentPeriod: {
+      month: currentMonth,
+      week: currentWeek
+    },
+    previousPeriod,
+    participants,
+    comparison,
+    totalParticipants: participants.length,
+    currentParticipants: currentRows.length,
+    previousParticipants: previousRows.length,
+    comparableParticipants: pairedParticipants.length
+  };
+}
+
+function drawGroupComparisonChart(doc, comparison) {
+  const margin = 45;
+  const contentWidth = doc.page.width - margin * 2;
+  const chartHeight = 78;
+  const labelWidth = 125;
+  const valueWidth = 74;
+  const barX = margin + labelWidth;
+  const barWidth = contentWidth - labelWidth - valueWidth;
+  const previousColor = "#6b9fb0";
+  const currentColor = "#20a58a";
+
+  doc
+    .font("Helvetica-Bold")
+    .fontSize(10)
+    .fillColor("#123b4a")
+    .text("GRAFIK PERBANDINGAN RATA-RATA", margin, doc.y);
+
+  doc.y += 17;
+
+  comparison.forEach((item, index) => {
+    const top = doc.y;
+
+    if (top + chartHeight > 720) {
+      doc.addPage();
+      drawPdfHeader(
+        doc,
+        "PERBANDINGAN RATA-RATA HASIL TEST",
+        "Grafik perkembangan kelompok"
+      );
+    }
+
+    const rowTop = doc.y;
+
+    doc
+      .font("Helvetica-Bold")
+      .fontSize(7.5)
+      .fillColor("#123b4a")
+      .text(item.label, margin, rowTop + 5, {
+        width: labelWidth - 8
+      });
+
+    const previous = cleanNumber(item.previous);
+    const current = cleanNumber(item.current);
+    const maxValue = Math.max(previous || 0, current || 0, 0);
+    const safeMax = maxValue > 0 ? maxValue : 1;
+
+    const prevWidth = previous === null ? 0 : (previous / safeMax) * barWidth;
+    const currWidth = current === null ? 0 : (current / safeMax) * barWidth;
+
+    // Bar minggu sebelumnya
+    doc
+      .font("Helvetica")
+      .fontSize(6.5)
+      .fillColor("#64777d")
+      .text("Lalu", barX, rowTop + 4, { width: 25 });
+
+    doc
+      .roundedRect(barX + 27, rowTop + 3, barWidth - 27, 12, 4)
+      .fill("#eef4f5");
+
+    if (previous !== null) {
+      doc
+        .roundedRect(
+          barX + 27,
+          rowTop + 3,
+          Math.max(2, prevWidth - 27),
+          12,
+          4
+        )
+        .fill(previousColor);
+    }
+
+    doc
+      .font("Helvetica-Bold")
+      .fontSize(6.8)
+      .fillColor("#123b4a")
+      .text(
+        previous === null ? "-" : `${pdfValue(previous)} ${item.unit}`,
+        barX + barWidth - 72,
+        rowTop + 5,
+        { width: 70, align: "right" }
+      );
+
+    // Bar minggu ini
+    doc
+      .font("Helvetica")
+      .fontSize(6.5)
+      .fillColor("#64777d")
+      .text("Kini", barX, rowTop + 25, { width: 25 });
+
+    doc
+      .roundedRect(barX + 27, rowTop + 24, barWidth - 27, 12, 4)
+      .fill("#eef4f5");
+
+    if (current !== null) {
+      doc
+        .roundedRect(
+          barX + 27,
+          rowTop + 24,
+          Math.max(2, currWidth - 27),
+          12,
+          4
+        )
+        .fill(currentColor);
+    }
+
+    doc
+      .font("Helvetica-Bold")
+      .fontSize(6.8)
+      .fillColor("#123b4a")
+      .text(
+        current === null ? "-" : `${pdfValue(current)} ${item.unit}`,
+        barX + barWidth - 72,
+        rowTop + 26,
+        { width: 70, align: "right" }
+      );
+
+    const statusColor =
+      item.direction === "better"
+        ? "#047857"
+        : item.direction === "worse"
+          ? "#be123c"
+          : "#64748b";
+
+    doc
+      .font("Helvetica-Bold")
+      .fontSize(7)
+      .fillColor(statusColor)
+      .text(
+        item.result,
+        margin,
+        rowTop + 49,
+        { width: contentWidth, align: "right" }
+      );
+
+    doc
+      .moveTo(margin, rowTop + chartHeight - 2)
+      .lineTo(margin + contentWidth, rowTop + chartHeight - 2)
+      .lineWidth(0.5)
+      .strokeColor("#dce7e9")
+      .stroke();
+
+    doc.y = rowTop + chartHeight + 3;
+  });
+}
+
+function drawGroupComparisonRapot(doc, data) {
+  const margin = 45;
+  const contentWidth = doc.page.width - margin * 2;
+  const comparison = Array.isArray(data.comparison) ? data.comparison : [];
+
+  const better = comparison.filter(item => item.direction === "better").length;
+  const worse = comparison.filter(item => item.direction === "worse").length;
+  const same = comparison.filter(item => item.direction === "same").length;
+  const comparableMetrics = comparison.filter(item => item.direction !== "none").length;
+
+  // =====================================================
+  // PERIODE EVALUASI
+  // =====================================================
+  doc
+    .font("Helvetica-Bold")
+    .fontSize(11)
+    .fillColor("#123b4a")
+    .text("PERIODE EVALUASI", margin, doc.y);
+
+  doc.moveDown(0.45);
+
+  const periodY = doc.y;
+  const periodHeight = 62;
+  const periodColWidth = contentWidth / 3;
+
+  doc
+    .roundedRect(margin, periodY, contentWidth, periodHeight, 7)
+    .fill("#f4f8f9");
+
+  const periodColumns = [
+    {
+      label: "MINGGU SEBELUMNYA",
+      value: `${data.previousPeriod?.month || "-"} — Minggu ${data.previousPeriod?.week || "-"}`,
+      x: margin
+    },
+    {
+      label: "MINGGU INI",
+      value: `${data.currentPeriod?.month || "-"} — Minggu ${data.currentPeriod?.week || "-"}`,
+      x: margin + periodColWidth
+    },
+    {
+      label: "PESERTA DIBANDINGKAN",
+      value: String(data.comparableParticipants ?? 0),
+      x: margin + periodColWidth * 2
+    }
+  ];
+
+  periodColumns.forEach(col => {
+    doc
+      .font("Helvetica-Bold")
+      .fontSize(7)
+      .fillColor("#64777d")
+      .text(col.label, col.x + 14, periodY + 11, {
+        width: periodColWidth - 28,
+        align: "left"
+      });
+
+    doc
+      .font("Helvetica-Bold")
+      .fontSize(10.5)
+      .fillColor("#123b4a")
+      .text(col.value, col.x + 14, periodY + 24, {
+        width: periodColWidth - 28,
+        align: "left",
+        lineBreak: false
+      });
+  });
+
+  doc.y = periodY + periodHeight + 16;
+
+  // =====================================================
+  // RINGKASAN
+  // =====================================================
+  doc
+    .font("Helvetica-Bold")
+    .fontSize(10)
+    .fillColor("#123b4a")
+    .text("RINGKASAN PERKEMBANGAN", margin, doc.y);
+
+  doc.y += 16;
+
+  const boxGap = 7;
+  const boxWidth = (contentWidth - boxGap * 4) / 5;
+  const summaryY = doc.y;
+
+  const boxes = [
+    {
+      title: "PESERTA MINGGU INI",
+      value: data.currentParticipants ?? 0,
+      color: "#123b4a",
+      bg: "#f4f8f9"
+    },
+    {
+      title: "DAPAT DIBANDINGKAN",
+      value: data.comparableParticipants ?? 0,
+      color: "#123b4a",
+      bg: "#f4f8f9"
+    },
+    {
+      title: "INDIKATOR MEMBAIK",
+      value: better,
+      color: "#047857",
+      bg: "#ecfdf5"
+    },
+    {
+      title: "INDIKATOR MENURUN",
+      value: worse,
+      color: "#be123c",
+      bg: "#fff1f2"
+    },
+    {
+      title: "INDIKATOR TETAP",
+      value: same,
+      color: "#64748b",
+      bg: "#f8fafc"
+    }
+  ];
+
+  boxes.forEach((box, index) => {
+    const x = margin + index * (boxWidth + boxGap);
+
+    doc
+      .roundedRect(x, summaryY, boxWidth, 55, 7)
+      .fill(box.bg);
+
+    doc
+      .font("Helvetica-Bold")
+      .fontSize(5.8)
+      .fillColor("#64777d")
+      .text(box.title, x + 5, summaryY + 8, {
+        width: boxWidth - 10,
+        align: "center",
+        lineBreak: false
+      });
+
+    doc
+      .font("Helvetica-Bold")
+      .fontSize(16)
+      .fillColor(box.color)
+      .text(String(box.value), x + 5, summaryY + 23, {
+        width: boxWidth - 10,
+        align: "center",
+        lineBreak: false
+      });
+  });
+
+  doc.y = summaryY + 72;
+
+  // =====================================================
+  // TABEL UTAMA
+  // =====================================================
+  doc
+    .font("Helvetica-Bold")
+    .fontSize(10)
+    .fillColor("#123b4a")
+    .text("PERBANDINGAN RATA-RATA HASIL TEST", margin, doc.y);
+
+  doc.y += 17;
+
+  const tableX = margin;
+  const tableY = doc.y;
+  const headerHeight = 24;
+  const rowHeight = 37;
+
+  const columns = [
+    { label: "TEST", x: tableX, width: 135 },
+    { label: "MINGGU LALU", x: tableX + 135, width: 82 },
+    { label: "MINGGU INI", x: tableX + 217, width: 82 },
+    { label: "PERUBAHAN", x: tableX + 299, width: 90 },
+    { label: "HASIL", x: tableX + 389, width: contentWidth - 389 }
+  ];
+
+  doc
+    .roundedRect(tableX, tableY, contentWidth, headerHeight, 5)
+    .fill("#123b4a");
+
+  columns.forEach(col => {
+    doc
+      .font("Helvetica-Bold")
+      .fontSize(6.2)
+      .fillColor("#ffffff")
+      .text(col.label, col.x + 5, tableY + 8, {
+        width: col.width - 10,
+        align: col.label === "TEST" ? "left" : "center",
+        lineBreak: false
+      });
+  });
+
+  let rowY = tableY + headerHeight;
+
+  comparison.forEach((item, index) => {
+    if (index % 2 === 0) {
+      doc
+        .rect(tableX, rowY, contentWidth, rowHeight)
+        .fill("#f8fbfc");
+    }
+
+    doc
+      .font("Helvetica-Bold")
+      .fontSize(7.2)
+      .fillColor("#123b4a")
+      .text(item.label || "-", tableX + 6, rowY + 8, {
+        width: 123,
+        lineBreak: false
+      });
+
+    doc
+      .font("Helvetica")
+      .fontSize(7.2)
+      .fillColor("#123b4a")
+      .text(
+        item.previous === null || item.previous === undefined
+          ? "-"
+          : `${pdfValue(item.previous)} ${item.unit || ""}`,
+        tableX + 140,
+        rowY + 8,
+        { width: 72, align: "center", lineBreak: false }
+      );
+
+    doc
+      .font("Helvetica-Bold")
+      .fontSize(7.2)
+      .fillColor("#123b4a")
+      .text(
+        item.current === null || item.current === undefined
+          ? "-"
+          : `${pdfValue(item.current)} ${item.unit || ""}`,
+        tableX + 222,
+        rowY + 8,
+        { width: 72, align: "center", lineBreak: false }
+      );
+
+    const changeText =
+      item.difference === null || item.difference === undefined
+        ? "-"
+        : `${item.difference > 0 ? "+" : ""}${pdfValue(item.difference)} ${item.unit || ""}`;
+
+    const statusColor =
+      item.direction === "better"
+        ? "#047857"
+        : item.direction === "worse"
+          ? "#be123c"
+          : "#64748b";
+
+    doc
+      .font("Helvetica-Bold")
+      .fontSize(6.8)
+      .fillColor(statusColor)
+      .text(changeText, tableX + 304, rowY + 8, {
+        width: 80,
+        align: "center",
+        lineBreak: false
+      });
+
+    const resultText =
+      item.direction === "better"
+        ? "↑ Membaik"
+        : item.direction === "worse"
+          ? "↓ Menurun"
+          : item.direction === "same"
+            ? "→ Tetap"
+            : "—";
+
+    doc
+      .font("Helvetica-Bold")
+      .fontSize(6.8)
+      .fillColor(statusColor)
+      .text(resultText, tableX + 394, rowY + 8, {
+        width: Math.max(1, contentWidth - 402),
+        align: "center",
+        lineBreak: false
+      });
+
+    doc
+      .moveTo(tableX, rowY + rowHeight)
+      .lineTo(tableX + contentWidth, rowY + rowHeight)
+      .lineWidth(0.5)
+      .strokeColor("#dce7e9")
+      .stroke();
+
+    rowY += rowHeight;
+  });
+
+  doc.y = rowY + 12;
+
+  // =====================================================
+  // GRAFIK
+  // Selalu mulai di halaman baru agar grafik tidak terpotong
+  // di tengah daftar indikator.
+  // =====================================================
+  doc.addPage();
+
+  drawPdfHeader(
+    doc,
+    "PERBANDINGAN RATA-RATA HASIL TEST",
+    "Grafik perkembangan kelompok"
+  );
+
+  drawGroupComparisonChart(doc, comparison);
+
+  // =====================================================
+  // KESIMPULAN
+  // =====================================================
+  if (doc.y > 650) {
+    doc.addPage();
+    drawPdfHeader(
+      doc,
+      "PERBANDINGAN RATA-RATA HASIL TEST",
+      "Kesimpulan perkembangan kelompok"
+    );
+  }
+
+  doc.y += 8;
+
+  let conclusion;
+
+  if (!comparableMetrics) {
+    conclusion =
+      "Belum ada indikator yang dapat dibandingkan karena data pada kedua minggu belum lengkap.";
+  } else if (better > worse) {
+    conclusion =
+      `${better} dari ${comparableMetrics} indikator menunjukkan rata-rata yang membaik dibandingkan minggu sebelumnya. ` +
+      `Hasil ini dapat digunakan sebagai bahan monitoring perkembangan kelompok.`;
+  } else if (worse > better) {
+    conclusion =
+      `${worse} dari ${comparableMetrics} indikator menunjukkan rata-rata yang menurun dibandingkan minggu sebelumnya. ` +
+      `Indikator tersebut dapat menjadi prioritas perhatian pada evaluasi berikutnya.`;
+  } else {
+    conclusion =
+      "Perkembangan rata-rata kelompok relatif seimbang. Beberapa indikator membaik, sementara indikator lainnya tetap atau menurun.";
+  }
+
+  const conclusionY = doc.y;
+
+  doc
+    .roundedRect(margin, conclusionY, contentWidth, 66, 7)
+    .fill("#f0fdfa");
+
+  doc
+    .font("Helvetica-Bold")
+    .fontSize(9)
+    .fillColor("#0f766e")
+    .text(
+      "KESIMPULAN PERKEMBANGAN KELOMPOK",
+      margin + 14,
+      conclusionY + 11
+    );
+
+  doc
+    .font("Helvetica")
+    .fontSize(8)
+    .fillColor("#334155")
+    .text(conclusion, margin + 14, conclusionY + 27, {
+      width: contentWidth - 28,
+      lineGap: 2
+    });
+
+  doc.y = conclusionY + 82;
+
+  doc
+    .font("Helvetica-Oblique")
+    .fontSize(6.8)
+    .fillColor("#64777d")
+    .text(
+      "Catatan: perubahan/status dihitung dari peserta yang memiliki data pada kedua minggu. Rata-rata tiap indikator menggunakan data numerik yang tersedia.",
+      margin,
+      doc.y,
+      { width: contentWidth, lineGap: 2 }
+    );
+}
+
+function drawComparisonRapot(
+  doc,
+  participant,
+  previous,
+  current,
+  standard
+){
+
+  const comparison =
+    compareEvaluationValues(
+      previous,
+      current,
+      standard
+    );
+
+
+  const pageWidth =
+    doc.page.width;
+
+
+  const margin = 45;
+
+  const contentWidth =
+    pageWidth - margin * 2;
+
+
+  // =====================================================
+  // IDENTITAS
+  // =====================================================
+
+  doc
+    .font("Helvetica-Bold")
+    .fontSize(11)
+    .fillColor("#123b4a")
+    .text(
+      "IDENTITAS PESERTA",
+      margin,
+      doc.y
+    );
+
+
+  doc.moveDown(0.5);
+
+
+  doc
+    .roundedRect(
+      margin,
+      doc.y,
+      contentWidth,
+      62,
+      7
+    )
+    .fill("#f4f8f9");
+
+
+  const identityY =
+    doc.y + 12;
+
+
+  doc
+    .font("Helvetica-Bold")
+    .fontSize(7)
+    .fillColor("#64777d")
+    .text(
+      "NAMA PESERTA",
+      margin + 14,
+      identityY
+    );
+
+
+  doc
+    .font("Helvetica-Bold")
+    .fontSize(10)
+    .fillColor("#123b4a")
+    .text(
+      participant.name,
+      margin + 14,
+      identityY + 12
+    );
+
+
+  doc
+    .font("Helvetica-Bold")
+    .fontSize(7)
+    .fillColor("#64777d")
+    .text(
+      "UMUR",
+      margin + 190,
+      identityY
+    );
+
+
+  doc
+    .font("Helvetica-Bold")
+    .fontSize(10)
+    .fillColor("#123b4a")
+    .text(
+      `${participant.age} tahun`,
+      margin + 190,
+      identityY + 12
+    );
+
+
+  doc
+    .font("Helvetica-Bold")
+    .fontSize(7)
+    .fillColor("#64777d")
+    .text(
+      "JENIS KELAMIN",
+      margin + 290,
+      identityY
+    );
+
+
+  doc
+    .font("Helvetica-Bold")
+    .fontSize(10)
+    .fillColor("#123b4a")
+    .text(
+      genderLabelPdf(
+        participant.gender
+      ),
+      margin + 290,
+      identityY + 12
+    );
+
+
+  doc
+    .font("Helvetica-Bold")
+    .fontSize(7)
+    .fillColor("#64777d")
+    .text(
+      "PERIODE",
+      margin + 400,
+      identityY
+    );
+
+
+  doc
+    .font("Helvetica-Bold")
+    .fontSize(9)
+    .fillColor("#123b4a")
+    .text(
+      `${current.month} — M${current.week}`,
+      margin + 400,
+      identityY + 12
+    );
+
+
+  doc.y += 78;
+
+
+  // =====================================================
+  // JUDUL PERBANDINGAN
+  // =====================================================
+
+  doc
+    .font("Helvetica-Bold")
+    .fontSize(14)
+    .fillColor("#123b4a")
+    .text(
+      "PERBANDINGAN HASIL TEST",
+      margin,
+      doc.y
+    );
+
+
+  doc
+    .font("Helvetica")
+    .fontSize(8)
+    .fillColor("#64777d")
+    .text(
+      `Minggu ${previous.week} dibandingkan dengan Minggu ${current.week}`,
+      margin,
+      doc.y + 20
+    );
+
+
+  doc.y += 42;
+
+
+  // =====================================================
+  // RINGKASAN
+  // =====================================================
+
+  const better =
+    comparison.filter(
+      x => x.direction === "better"
+    ).length;
+
+
+  const worse =
+    comparison.filter(
+      x => x.direction === "worse"
+    ).length;
+
+
+  const same =
+    comparison.filter(
+      x => x.direction === "same"
+    ).length;
+
+
+  const summaryY =
+    doc.y;
+
+
+  const boxGap = 10;
+
+  const boxWidth =
+    (contentWidth - boxGap * 2) / 3;
+
+
+  const summaryBoxes = [
+
+    {
+      title: "MEMBAIK",
+      value: better
+    },
+
+    {
+      title: "MENURUN",
+      value: worse
+    },
+
+    {
+      title: "TETAP",
+      value: same
+    }
+
+  ];
+
+
+  summaryBoxes.forEach(
+    (box, index) => {
+
+      const x =
+        margin +
+        index *
+          (boxWidth + boxGap);
+
+
+      doc
+        .roundedRect(
+          x,
+          summaryY,
+          boxWidth,
+          55,
+          7
+        )
+        .fill(
+          index === 0
+            ? "#ecfdf5"
+            : index === 1
+              ? "#fff1f2"
+              : "#f8fafc"
+        );
+
+
+      doc
+        .font("Helvetica-Bold")
+        .fontSize(7)
+        .fillColor(
+          index === 0
+            ? "#047857"
+            : index === 1
+              ? "#be123c"
+              : "#64748b"
+        )
+        .text(
+          box.title,
+          x + 10,
+          summaryY + 10
+        );
+
+
+      doc
+        .font("Helvetica-Bold")
+        .fontSize(18)
+        .fillColor("#123b4a")
+        .text(
+          String(box.value),
+          x + 10,
+          summaryY + 23
+        );
+
+    }
+  );
+
+
+  doc.y =
+    summaryY + 75;
+
+
+  // =====================================================
+  // TABEL PERBANDINGAN
+  // =====================================================
+
+  doc
+    .font("Helvetica-Bold")
+    .fontSize(10)
+    .fillColor("#123b4a")
+    .text(
+      "PERKEMBANGAN SETIAP GERAKAN",
+      margin,
+      doc.y
+    );
+
+
+  doc.y += 18;
+
+
+  const tableX =
+    margin;
+
+
+  const tableY =
+    doc.y;
+
+
+  const columns = [
+
+    {
+      label: "GERAKAN",
+      x: tableX,
+      width: 155
+    },
+
+    {
+      label: `MINGGU ${previous.week}`,
+      x: tableX + 155,
+      width: 80
+    },
+
+    {
+      label: `MINGGU ${current.week}`,
+      x: tableX + 235,
+      width: 80
+    },
+
+    {
+      label: "PERUBAHAN",
+      x: tableX + 315,
+      width: 95
+    },
+
+    {
+      label: "HASIL",
+      x: tableX + 410,
+      width: contentWidth - 410
+    }
+
+  ];
+
+
+  const headerHeight = 25;
+
+
+  doc
+    .roundedRect(
+      tableX,
+      tableY,
+      contentWidth,
+      headerHeight,
+      5
+    )
+    .fill("#123b4a");
+
+
+  columns.forEach(col => {
+
+    doc
+      .font("Helvetica-Bold")
+      .fontSize(6.5)
+      .fillColor("#ffffff")
+      .text(
+        col.label,
+        col.x + 6,
+        tableY + 8,
+        {
+          width: col.width - 12,
+          align:
+            col.label === "GERAKAN"
+              ? "left"
+              : "center"
+        }
+      );
+
+  });
+
+
+  let rowY =
+    tableY + headerHeight;
+
+
+  comparison.forEach(
+    (item, index) => {
+
+      const rowHeight = 38;
+
+
+      if(index % 2 === 0){
+
+        doc
+          .rect(
+            tableX,
+            rowY,
+            contentWidth,
+            rowHeight
+          )
+          .fill("#f8fbfc");
+
+      }
+
+
+      doc
+        .font("Helvetica-Bold")
+        .fontSize(7.5)
+        .fillColor("#123b4a")
+        .text(
+          item.label,
+          tableX + 6,
+          rowY + 9,
+          {
+            width: 143
+          }
+        );
+
+
+      doc
+        .font("Helvetica")
+        .fontSize(8)
+        .fillColor("#123b4a")
+        .text(
+          item.previous === null
+            ? "-"
+            : `${pdfValue(item.previous)} ${item.unit}`,
+          tableX + 161,
+          rowY + 9,
+          {
+            width: 68,
+            align: "center"
+          }
+        );
+
+
+      doc
+        .font("Helvetica-Bold")
+        .fontSize(8)
+        .fillColor("#123b4a")
+        .text(
+          item.current === null
+            ? "-"
+            : `${pdfValue(item.current)} ${item.unit}`,
+          tableX + 241,
+          rowY + 9,
+          {
+            width: 68,
+            align: "center"
+          }
+        );
+
+
+      let changeText =
+        "-";
+
+
+      if(item.difference !== null){
+
+        const sign =
+          item.difference > 0
+            ? "+"
+            : "";
+
+
+        changeText =
+          `${sign}${pdfValue(item.difference)} ${item.unit}`;
+
+      }
+
+
+      doc
+        .font("Helvetica-Bold")
+        .fontSize(7)
+        .fillColor(
+          item.direction === "better"
+            ? "#047857"
+            : item.direction === "worse"
+              ? "#be123c"
+              : "#64748b"
+        )
+        .text(
+          changeText,
+          tableX + 321,
+          rowY + 9,
+          {
+            width: 83,
+            align: "center"
+          }
+        );
+
+
+      const resultText =
+        item.direction === "better"
+          ? "↑ Membaik"
+          : item.direction === "worse"
+            ? "↓ Menurun"
+            : item.direction === "same"
+              ? "→ Tetap"
+              : "—";
+
+
+      doc
+        .font("Helvetica-Bold")
+        .fontSize(7)
+        .fillColor(
+          item.direction === "better"
+            ? "#047857"
+            : item.direction === "worse"
+              ? "#be123c"
+              : "#64748b"
+        )
+        .text(
+          resultText,
+          tableX + 416,
+          rowY + 9,
+          {
+            width:
+              contentWidth - 422,
+            align: "center"
+          }
+        );
+
+
+      doc
+        .moveTo(
+          tableX,
+          rowY + rowHeight
+        )
+        .lineTo(
+          tableX + contentWidth,
+          rowY + rowHeight
+        )
+        .lineWidth(0.5)
+        .strokeColor("#dce7e9")
+        .stroke();
+
+
+      rowY += rowHeight;
+
+    }
+  );
+
+
+  doc.y =
+    rowY + 18;
+
+
+  // =====================================================
+  // KESIMPULAN
+  // =====================================================
+
+  const totalCompared =
+    better + worse + same;
+
+
+  let conclusion = "";
+
+
+  if(better > worse){
+
+    conclusion =
+      `Hasil evaluasi menunjukkan perkembangan positif. ` +
+      `${better} dari ${totalCompared} indikator mengalami peningkatan ` +
+      `dibandingkan minggu sebelumnya.`;
+
+  }
+
+  else if(worse > better){
+
+    conclusion =
+      `Hasil evaluasi menunjukkan masih terdapat beberapa indikator ` +
+      `yang perlu mendapatkan perhatian. ${worse} indikator mengalami ` +
+      `penurunan dibandingkan minggu sebelumnya.`;
+
+  }
+
+  else{
+
+    conclusion =
+      `Hasil evaluasi relatif stabil. Perubahan hasil minggu ini ` +
+      `belum menunjukkan perbedaan yang dominan dibandingkan minggu sebelumnya.`;
+
+  }
+
+
+  doc
+    .roundedRect(
+      margin,
+      doc.y,
+      contentWidth,
+      65,
+      7
+    )
+    .fill("#f0fdfa");
+
+
+  doc
+    .font("Helvetica-Bold")
+    .fontSize(9)
+    .fillColor("#0f766e")
+    .text(
+      "KESIMPULAN PERKEMBANGAN",
+      margin + 14,
+      doc.y + 12
+    );
+
+
+  doc
+    .font("Helvetica")
+    .fontSize(8.5)
+    .fillColor("#334155")
+    .text(
+      conclusion,
+      margin + 14,
+      doc.y + 27,
+      {
+        width:
+          contentWidth - 28,
+        lineGap: 2
+      }
+    );
+
+
+  doc.y += 82;
+
+
+  // =====================================================
+  // REKOMENDASI
+  // =====================================================
+
+  const recommendationData =
+    recommendation(
+      current,
+      standard
+    );
+
+
+  doc
+    .font("Helvetica-Bold")
+    .fontSize(10)
+    .fillColor("#123b4a")
+    .text(
+      "REKOMENDASI LATIHAN",
+      margin,
+      doc.y
+    );
+
+
+  doc.y += 15;
+
+
+  if(
+    recommendationData.items &&
+    recommendationData.items.length
+  ){
+
+    recommendationData.items
+      .slice(0, 4)
+      .forEach(item => {
+
+        doc
+          .font("Helvetica-Bold")
+          .fontSize(8)
+          .fillColor("#123b4a")
+          .text(
+            `${item.focus} — ${item.priority}`,
+            margin,
+            doc.y
+          );
+
+
+        item.exercises
+          .slice(0, 2)
+          .forEach(exercise => {
+
+            doc
+              .font("Helvetica")
+              .fontSize(7.5)
+              .fillColor("#475569")
+              .text(
+                `• ${exercise.name}: ${exercise.dose}, ${exercise.info}`,
+                margin + 10,
+                doc.y + 2,
+                {
+                  width:
+                    contentWidth - 20
+                }
+              );
+
+            doc.y += 13;
+
+          });
+
+
+        doc.y += 5;
+
+      });
+
+  }else{
+
+    doc
+      .font("Helvetica")
+      .fontSize(8)
+      .fillColor("#64748b")
+      .text(
+        "Pertahankan latihan rutin dan lakukan evaluasi secara berkala.",
+        margin,
+        doc.y
+      );
+
+  }
+
+
+  // Footer
+
+  doc
+    .font("Helvetica")
+    .fontSize(7)
+    .fillColor("#94a3b8")
+    .text(
+      "Rapot Hasil Test Senam • Monitoring Evaluasi Peserta",
+      margin,
+      750,
+      {
+        width: contentWidth,
+        align: "center"
+      }
+    );
+
+}
+
 app.get("/api/reports/pdf", async (req, res) => {
   try {
     const type = String(req.query.type || "weekly");
@@ -2395,6 +4022,271 @@ app.get("/api/reports/pdf", async (req, res) => {
 // =====================================================
 // RAPOT INDIVIDU
 // =====================================================
+// =====================================================
+// RAPOT PERBANDINGAN MINGGUAN
+// =====================================================
+
+// =====================================================
+// RAPOT PERBANDINGAN KELOMPOK
+// =====================================================
+// URL contoh:
+// /api/reports/pdf?type=group_comparison&month=September&week=2
+// Tidak membutuhkan participant_id.
+if (type === "group_comparison") {
+
+  if (!month) {
+    return res.status(400).json({
+      error: "Bulan evaluasi wajib dipilih."
+    });
+  }
+
+  if (!week || week < 1) {
+    return res.status(400).json({
+      error: "Minggu evaluasi tidak valid."
+    });
+  }
+
+  const data = getGroupComparisonData(month, week);
+
+  if (!data || !data.previousPeriod) {
+    return res.status(404).json({
+      error:
+        `Belum ditemukan data minggu sebelumnya dari ${month} Minggu ${week}.`
+    });
+  }
+
+  if (!data.currentParticipants) {
+    return res.status(404).json({
+      error:
+        `Belum ada data evaluasi untuk ${month} Minggu ${week}.`
+    });
+  }
+
+  if (!data.previousParticipants) {
+    return res.status(404).json({
+      error:
+        `Belum ada data evaluasi untuk ${data.previousPeriod.month} Minggu ${data.previousPeriod.week}.`
+    });
+  }
+
+  const doc = new PDFDocument({
+    size: "A4",
+    margin: 45,
+    bufferPages: true
+  });
+
+  const safeMonth = String(month)
+    .replace(/[^a-zA-Z0-9_-]+/g, "_");
+
+  const filename =
+    `Rapot_Perbandingan_Kelompok_${safeMonth}_` +
+    `Minggu_${data.previousPeriod.week}_vs_${data.currentPeriod.week}.pdf`;
+
+  res.setHeader("Content-Type", "application/pdf");
+  res.setHeader(
+    "Content-Disposition",
+    `attachment; filename="${filename}"`
+  );
+
+  doc.pipe(res);
+
+  drawPdfHeader(
+    doc,
+    "RAPOT PERBANDINGAN HASIL TEST SENAM",
+    `Perbandingan rata-rata kelompok: ${data.previousPeriod.month} M${data.previousPeriod.week} → ${data.currentPeriod.month} M${data.currentPeriod.week}`
+  );
+
+  drawGroupComparisonRapot(doc, data);
+
+  doc.end();
+  return;
+}
+
+if (type === "comparison") {
+
+  if (!participantId) {
+
+    return res.status(400).json({
+      error: "Peserta wajib dipilih."
+    });
+
+  }
+
+
+  if (!month) {
+
+    return res.status(400).json({
+      error: "Bulan evaluasi wajib dipilih."
+    });
+
+  }
+
+
+  if (!week || week < 2) {
+
+    return res.status(400).json({
+      error:
+        "Rapot perbandingan membutuhkan minimal Minggu 2."
+    });
+
+  }
+
+
+  const participant =
+    db.prepare(`
+      SELECT *
+      FROM participants
+      WHERE id = ?
+    `).get(participantId);
+
+
+  if (!participant) {
+
+    return res.status(404).json({
+      error: "Peserta tidak ditemukan."
+    });
+
+  }
+
+
+  const standard =
+    standardFor(
+      participant.age,
+      participant.gender
+    );
+
+
+  // ===================================================
+  // MINGGU SAAT INI
+  // ===================================================
+
+  const current =
+    db.prepare(`
+      SELECT *
+      FROM evaluations
+      WHERE participant_id = ?
+        AND month = ?
+        AND week = ?
+      LIMIT 1
+    `).get(
+      participantId,
+      month,
+      week
+    );
+
+
+  if (!current) {
+
+    return res.status(404).json({
+      error:
+        `Belum ada evaluasi Minggu ${week} untuk peserta ini.`
+    });
+
+  }
+
+
+  // ===================================================
+  // MINGGU SEBELUMNYA
+  // ===================================================
+
+  const previous =
+    db.prepare(`
+      SELECT *
+      FROM evaluations
+      WHERE participant_id = ?
+        AND month = ?
+        AND week < ?
+      ORDER BY week DESC, id DESC
+      LIMIT 1
+    `).get(
+      participantId,
+      month,
+      week
+    );
+
+
+  if (!previous) {
+
+    return res.status(404).json({
+      error:
+        `Belum ada evaluasi minggu sebelumnya dari Minggu ${week}.`
+    });
+
+  }
+
+
+  // ===================================================
+  // BUAT PDF
+  // ===================================================
+
+  const doc =
+    new PDFDocument({
+      size: "A4",
+      margin: 45,
+      bufferPages: true
+    });
+
+
+  const safeName =
+    String(
+      participant.name || "Peserta"
+    )
+      .replace(
+        /[^a-zA-Z0-9_-]+/g,
+        "_"
+      );
+
+
+  const filename =
+    `Rapot_Perbandingan_${safeName}_` +
+    `${month}_Minggu_${previous.week}_vs_${current.week}.pdf`;
+
+
+  res.setHeader(
+    "Content-Type",
+    "application/pdf"
+  );
+
+
+  res.setHeader(
+    "Content-Disposition",
+    `attachment; filename="${filename}"`
+  );
+
+
+  doc.pipe(res);
+
+
+  // ===================================================
+  // HEADER
+  // ===================================================
+
+  drawPdfHeader(
+    doc,
+    "RAPOT PERBANDINGAN HASIL TEST SENAM",
+    `Perbandingan Minggu ${previous.week} dan Minggu ${current.week}`
+  );
+
+
+  // ===================================================
+  // ISI RAPOT
+  // ===================================================
+
+  drawComparisonRapot(
+    doc,
+    participant,
+    previous,
+    current,
+    standard
+  );
+
+
+  doc.end();
+
+  return;
+
+}
+
 if (type === "weekly" || type === "monthly") {
 
   if (!participantId) {

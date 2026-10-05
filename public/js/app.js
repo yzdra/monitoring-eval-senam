@@ -1,4 +1,3 @@
-
 let participants = [];
 let standards = [];
 let charts = [];
@@ -1430,63 +1429,175 @@ function changeReportType(){
   const weekField =
     $('reportWeekField');
 
-  if(type === 'summary'){
+  const weekLabel =
+    $('reportWeekLabel');
 
-    if(participantField){
-      participantField.style.display = 'none';
+  // Rapot summary dan perbandingan kelompok
+  // tidak membutuhkan pilihan peserta.
+  const hideParticipant =
+    type === 'summary' ||
+    type === 'group_comparison';
+
+  if(participantField){
+    participantField.style.display =
+      hideParticipant ? 'none' : '';
+  }
+
+  // Summary tidak membutuhkan minggu.
+  // Semua jenis rapot lainnya membutuhkan periode minggu.
+  if(weekField){
+    weekField.style.display =
+      type === 'summary' ? 'none' : '';
+  }
+
+  if(weekLabel){
+    if(
+      type === 'comparison' ||
+      type === 'group_comparison'
+    ){
+      weekLabel.textContent =
+        'Minggu Evaluasi Saat Ini';
+    }else{
+      weekLabel.textContent =
+        'Minggu';
     }
-
-    if(weekField){
-      weekField.style.display = 'none';
-    }
-
-  }else{
-
-    if(participantField){
-      participantField.style.display = '';
-    }
-
-    if(weekField){
-      weekField.style.display =
-        type === 'weekly'
-          ? ''
-          : 'none';
-    }
-
   }
 
   const preview =
     $('reportPreview');
 
-  if(preview){
+  if(!preview) return;
+
+  if(type === 'comparison'){
 
     preview.innerHTML = `
+
+      <div class="report-preview-icon">
+        ↔️
+      </div>
+
+      <h4>
+        Rapot Perbandingan Individu
+      </h4>
+
+      <p>
+        Membandingkan hasil evaluasi peserta
+        pada minggu sebelumnya dengan minggu yang dipilih.
+      </p>
+
+      <div
+        style="
+          margin-top:12px;
+          padding:12px;
+          border-radius:10px;
+          background:#f0fdfa;
+          color:#0f766e;
+          font-size:13px;
+        "
+      >
+        <b>Catatan:</b>
+        Pilih peserta, bulan, dan minggu saat ini.
+      </div>
+
+    `;
+
+    return;
+  }
+
+  if(type === 'group_comparison'){
+
+    preview.innerHTML = `
+
+      <div class="report-preview-icon">
+        📊
+      </div>
+
+      <h4>
+        Rapot Perbandingan Kelompok
+      </h4>
+
+      <p>
+        Membandingkan rata-rata hasil seluruh peserta
+        antara minggu sebelumnya dan minggu yang dipilih.
+      </p>
+
+      <div
+        style="
+          margin-top:12px;
+          padding:12px;
+          border-radius:10px;
+          background:#f0fdfa;
+          color:#0f766e;
+          font-size:13px;
+        "
+      >
+        <b>Yang dibandingkan:</b>
+        rata-rata Duduk-Berdiri, Berdiri 1 Kaki,
+        Jangkauan, dan Genggaman.
+      </div>
+
+    `;
+
+    return;
+  }
+
+  if(type === 'weekly'){
+
+    preview.innerHTML = `
+
       <div class="report-preview-icon">
         📋
       </div>
 
       <h4>
-        ${
-          type === 'weekly'
-            ? 'Rapot Mingguan'
-            : type === 'monthly'
-              ? 'Rapot Bulanan'
-              : 'Rekap Rata-rata Peserta'
-        }
+        Rapot Mingguan
       </h4>
 
       <p>
-        ${
-          type === 'weekly'
-            ? 'Rapot hasil evaluasi peserta pada satu minggu.'
-            : type === 'monthly'
-              ? 'Rapot perkembangan peserta selama satu bulan.'
-              : 'Rekap rata-rata hasil evaluasi seluruh peserta.'
-        }
+        Rapot hasil evaluasi peserta pada satu minggu.
       </p>
+
     `;
 
+    return;
   }
+
+  if(type === 'monthly'){
+
+    preview.innerHTML = `
+
+      <div class="report-preview-icon">
+        📅
+      </div>
+
+      <h4>
+        Rapot Bulanan
+      </h4>
+
+      <p>
+        Rapot perkembangan peserta selama satu bulan.
+      </p>
+
+    `;
+
+    return;
+  }
+
+  preview.innerHTML = `
+
+    <div class="report-preview-icon">
+      📊
+    </div>
+
+    <h4>
+      Rekap Rata-rata Peserta
+    </h4>
+
+    <p>
+      Rekap rata-rata hasil evaluasi seluruh peserta.
+    </p>
+
+  `;
 
 }
 
@@ -1504,7 +1615,14 @@ async function downloadReport(){
   const week =
     $('reportWeek')?.value;
 
-  if(type !== 'summary' && !participant){
+  // Rapot yang membutuhkan peserta:
+  // weekly, comparison, monthly.
+  // summary dan group_comparison berlaku untuk semua peserta.
+  const needsParticipant =
+    type !== 'summary' &&
+    type !== 'group_comparison';
+
+  if(needsParticipant && !participant){
 
     toast('Pilih peserta terlebih dahulu.');
 
@@ -1520,7 +1638,8 @@ async function downloadReport(){
 
   }
 
-  if(type === 'weekly' && !week){
+  // Semua tipe selain summary membutuhkan minggu.
+  if(type !== 'summary' && !week){
 
     toast('Pilih minggu evaluasi.');
 
@@ -1538,14 +1657,17 @@ async function downloadReport(){
     params.set('type',type);
     params.set('month',month);
 
-    if(participant){
+    if(participant && !(
+      type === 'summary' ||
+      type === 'group_comparison'
+    )){
       params.set(
         'participant_id',
         participant
       );
     }
 
-    if(type === 'weekly'){
+    if(type !== 'summary'){
       params.set('week',week);
     }
 
@@ -1581,9 +1703,13 @@ async function downloadReport(){
     a.download =
       type === 'weekly'
         ? 'Rapot_Mingguan.pdf'
-        : type === 'monthly'
-          ? 'Rapot_Bulanan.pdf'
-          : 'Rekap_RataRata_Senam.pdf';
+        : type === 'comparison'
+          ? 'Rapot_Perbandingan_Individu.pdf'
+          : type === 'group_comparison'
+            ? 'Rapot_Perbandingan_Kelompok.pdf'
+            : type === 'monthly'
+              ? 'Rapot_Bulanan.pdf'
+              : 'Rekap_RataRata_Senam.pdf';
 
     document.body.appendChild(a);
 
@@ -1593,7 +1719,11 @@ async function downloadReport(){
 
     URL.revokeObjectURL(url);
 
-    toast('Rapot berhasil didownload.');
+    toast(
+      type === 'group_comparison'
+        ? 'Rapot perbandingan kelompok berhasil didownload.'
+        : 'Rapot berhasil didownload.'
+    );
 
   }catch(error){
 
