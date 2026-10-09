@@ -6,7 +6,6 @@ import { fileURLToPath } from "url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
-
 const db = new Database(path.join(__dirname, "data_senam.db"));
 db.pragma("journal_mode = WAL");
 db.pragma("foreign_keys = ON");
@@ -4012,6 +4011,26 @@ function drawComparisonRapot(
 
 }
 
+function drawRapotFooter(doc) {
+  const margin = 45;
+  const pageHeight = doc.page.height;
+  const contentWidth = doc.page.width - margin * 2;
+
+  doc
+    .font("Helvetica")
+    .fontSize(7.5)
+    .fillColor("#64777d")
+    .text(
+      "Dokumen ini dicetak secara otomatis oleh Sistem Monitoring & Evaluasi Senam.",
+      margin,
+      pageHeight - 30,
+      {
+        width: contentWidth,
+        align: "center"
+      }
+    );
+}
+
 app.get("/api/reports/pdf", async (req, res) => {
   try {
     const type = String(req.query.type || "weekly");
@@ -4019,19 +4038,6 @@ app.get("/api/reports/pdf", async (req, res) => {
     const month = String(req.query.month || "").trim();
     const week = Number(req.query.week || 1);
 
-// =====================================================
-// RAPOT INDIVIDU
-// =====================================================
-// =====================================================
-// RAPOT PERBANDINGAN MINGGUAN
-// =====================================================
-
-// =====================================================
-// RAPOT PERBANDINGAN KELOMPOK
-// =====================================================
-// URL contoh:
-// /api/reports/pdf?type=group_comparison&month=September&week=2
-// Tidak membutuhkan participant_id.
 if (type === "group_comparison") {
 
   if (!month) {
